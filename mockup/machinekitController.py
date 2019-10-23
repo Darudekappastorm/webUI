@@ -66,7 +66,7 @@ class linuxcnc():
 
             self.file = "/dir/files/smile.nc"
             self.feedrate = 1
-            self.velocity = 1200
+            self.velocity = 53.3333
             self.max_velocity = 50
             self.max_acceleration = 5000
             self.pocket_prepped = -1
@@ -202,7 +202,6 @@ class MachinekitController():
             },
             "values": {
                 "velocity": self.s.velocity,
-                "max_velocity": self.s.max_velocity * 60,
                 "max_acceleration": self.s.max_acceleration
             }
         }
