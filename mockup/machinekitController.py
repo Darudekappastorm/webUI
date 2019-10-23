@@ -460,8 +460,7 @@ class MachinekitController():
         """ Spindle override floatyboii betweem 0 and 1"""
         if value > 1 or value < 0:
             return {"errors": "Value outside of limits"}
-
-        self.s.spindle_speed = value
+        self.s.spindlerate = value
         return self.errors()
 
     @checkerrors

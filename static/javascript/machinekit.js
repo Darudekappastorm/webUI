@@ -206,7 +206,6 @@ class Machinekit {
     }
 
     async fileManager() {
-        console.log("Render the file manager");
         document.body.className = "filemanager no-critical-errors";
         const result = await this.request.get("/server/files");
         if ("errors" in result) {

@@ -12,8 +12,7 @@
     <link href="//css.underdark.nl/0.2/module.css" rel="stylesheet" />
     <link href="//css.underdark.nl/0.2/theme.css" rel="stylesheet" />
     <link rel="stylesheet" href="/static/css/index.css">
-    <script src="https://cdn.jsdelivr.net/npm/@shopify/draggable@1.0.0-beta.8/lib/draggable.bundle.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@shopify/draggable@1.0.0-beta.8/lib/sortable.js"></script>
+    <script src="/static/javascript/sortable.js"></script>
 </head>
 
 <body>
@@ -196,14 +195,15 @@
 
                         <div id="feed-override-control">
                             <label>Feed override</label>
-                            <input type="range" min="0" max="120" value="0" onkeydown="return false;"
+                            <input type="range" min="0" max="{{max_feed_override}}" value="0" onkeydown="return false;"
                                 onchange="machinekit.controlOverrides(this, '/machinekit/feed')" id="feed-override" />
                             <span><output id="feed-override-output">120</output>%</span>
                         </div>
 
                         <div id="spindle-override-control">
                             <label>Spindle override</label>
-                            <input type="range" min="0" max="100" value="0" onkeydown="return false;"
+                            <input type="range" min="0" max="{{max_spindle_override}}" value="0"
+                                onkeydown="return false;"
                                 onchange="machinekit.controlOverrides(this, '/machinekit/spindle/override')"
                                 id="spindle-override" />
                             <span><output id="spindle-override-output">100</output>%</span>
@@ -211,7 +211,7 @@
 
                         <div id="max-velocity-control">
                             <label>Max velocity</label>
-                            <input type="range" min="0" max="3200" value="0" onkeydown="return false;"
+                            <input type="range" min="0" max="{{maxvel}}" value="0" onkeydown="return false;"
                                 onchange="machinekit.controlOverrides(this, '/machinekit/maxvel')" id="max-velocity" />
                             <span><output id="max-velocity-output">3200</output></span>
                         </div>

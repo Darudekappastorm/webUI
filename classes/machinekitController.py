@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import linuxcnc
+import sys
 
 def checkerrors(f):
     """ Decorator that checks if the machine returned any errors."""
@@ -14,12 +15,17 @@ def checkerrors(f):
 class MachinekitController():
     """ The Machinekit python interface in a class """
 
-    def __init__(self):
+    def __init__(self, ini):
             self.s = linuxcnc.stat()
             self.c = linuxcnc.command()
             self.e = linuxcnc.error_channel()
             self.axes = self.set_axes()
             self.axes_with_cords = {}
+            self.ini = linuxcnc.ini(ini)
+            
+            self.max_feed_override = self.ini.find("DISPLAY", "MAX_FEED_OVERRIDE")
+            self.max_spindle_override = self.ini.find("DISPLAY", "MAX_SPINDLE_OVERRIDE")
+            self.max_velocity = self.s.max_velocity * 60
 
 
     # Class is split up in getters and setters 
@@ -118,8 +124,10 @@ class MachinekitController():
             },
             "values": {
                 "velocity": self.s.velocity,
-                "max_velocity": self.s.max_velocity * 60,
-                "max_acceleration": self.s.max_acceleration
+                "max_velocity": self.max_velocity,
+                "max_acceleration": self.s.max_acceleration,
+                "max_feed_override": self.max_feed_override,
+                "max_spindle_override": self.max_spindle_override
             }
         }
     
