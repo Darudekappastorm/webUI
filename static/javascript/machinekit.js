@@ -89,7 +89,7 @@ class Machinekit {
                 spindle_enabled
             },
             values: {
-                max_velocity
+                velocity
             },
             position
         } = this.state;
@@ -201,8 +201,8 @@ class Machinekit {
         document.getElementById("spindle-override").value = Math.round((spindlerate * 100));
         document.getElementById("spindle-override-output").innerHTML = Math.round((spindlerate * 100));
 
-        document.getElementById("max-velocity").value = Math.round((max_velocity));
-        document.getElementById("max-velocity-output").innerHTML = Math.round((max_velocity));
+        document.getElementById("max-velocity").value = Math.round((velocity * 60));
+        document.getElementById("max-velocity-output").innerHTML = Math.round((velocity * 60));
     }
 
     async fileManager() {

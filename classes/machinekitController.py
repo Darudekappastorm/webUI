@@ -123,8 +123,7 @@ class MachinekitController():
                 "tool_change": self.s.pocket_prepped
             },
             "values": {
-                "velocity": self.s.velocity,
-                "max_velocity": self.max_velocity,
+                "velocity": self.s.max_velocity,
                 "max_acceleration": self.s.max_acceleration,
                 "max_feed_override": self.max_feed_override,
                 "max_spindle_override": self.max_spindle_override
