@@ -84,7 +84,6 @@ body.controller.no-critical-errors.rcs-done #rcs-done,
 body.controller.no-critical-errors.rcs-exec #rcs-exec,
 body.controller.no-critical-errors.rcs-error #rcs-error {
     display: block;
-    padding: 1em;
 }
 
 body.controller.no-critical-errors #machine-estop,
@@ -190,25 +189,30 @@ body.controller.no-critical-errors.estop-disabled.power-on #z-control {
     flex-direction: column;
     flex-basis: 100%;
     flex: 1;
+    margin: 2px;
 }
 
 .content {
-    margin-bottom: 5px;
     background: rgba(0, 0, 0, .05);
     border: 1px solid rgba(0, 0, 0, .05)
 }
 
+.content p {
+    padding: 0.5em;
+    margin: 5px;
+}
+
 .standard-axes {}
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (min-width: 801px) and (max-width: 1000px) {
 
     .column,
     .column-axes {
-        flex-basis: 33%;
+        flex-basis: calc(33% - 4px);
     }
 }
 
-@media only screen and (max-width: 800px) {
+@media only screen and (min-width: 601px) and (max-width: 800px) {
 
     .center {
         min-width: 0px;
@@ -247,12 +251,9 @@ body.controller.no-critical-errors.estop-disabled.power-on #z-control {
     }
 
     .column {
-        flex-basis: 50%;
+        flex-basis: calc(50% - 4px);
     }
 
-    .column-axes {
-        flex-basis: 100%;
-    }
 }
 
 @media only screen and (max-width: 600px) {
