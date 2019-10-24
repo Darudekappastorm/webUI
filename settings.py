@@ -2,7 +2,6 @@ def init():
     global machinekit_running
     global controller
     global file_queue
-    global UPLOAD_FOLDER
     machinekit_running = False
-    controller = False
+    controller = None
     file_queue = []
