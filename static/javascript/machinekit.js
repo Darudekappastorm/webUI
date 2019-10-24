@@ -78,7 +78,6 @@ class Machinekit {
 
     async getMachineVitals() {
         const result = await this.request.get("/machinekit/status");
-        console.log(result);
         if ("errors" in result) {
             return this.errorHandler(result.errors);
         }
