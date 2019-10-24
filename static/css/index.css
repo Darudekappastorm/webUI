@@ -18,7 +18,10 @@
 #task-mdi,
 #task-auto,
 #task-manual,
-#spindle-speed {
+#spindle-speed,
+#rcs-done,
+#rcs-error,
+#rcs-exec {
     display: none;
 }
 
@@ -65,7 +68,10 @@ body.filemanager.no-critical-errors #file-manager {
 body.controller.no-critical-errors.estop-enabled #estop-enabled,
 body.controller.no-critical-errors.estop-disabled #estop-disabled,
 body.controller.no-critical-errors.power-on #power-on,
-body.controller.no-critical-errors.power-off #power-off,
+body.controller.no-critical-errors.power-off #power-off {
+    display: block;
+}
+
 body.controller.no-critical-errors.interp-idle #interp-idle,
 body.controller.no-critical-errors.interp-paused #interp-paused,
 body.controller.no-critical-errors.interp-waiting #interp-waiting,
@@ -73,8 +79,12 @@ body.controller.no-critical-errors.interp-reading #interp-reading,
 body.controller.no-critical-errors.mode-auto #task-auto,
 body.controller.no-critical-errors.mode-mdi #task-mdi,
 body.controller.no-critical-errors.mode-manual #task-manual,
-body.controller.no-critical-errors #spindle-speed {
-    display: table-cell;
+body.controller.no-critical-errors #spindle-speed,
+body.controller.no-critical-errors.rcs-done #rcs-done,
+body.controller.no-critical-errors.rcs-exec #rcs-exec,
+body.controller.no-critical-errors.rcs-error #rcs-error {
+    display: block;
+    padding: 1em;
 }
 
 body.controller.no-critical-errors #machine-estop,
@@ -167,7 +177,36 @@ body.controller.no-critical-errors.estop-disabled.power-on #z-control {
     height: 55px;
 }
 
-@media only screen and (max-width: 600px) {
+.row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    flex-basis: 100%;
+    flex: 1;
+}
+
+.content {
+    margin-bottom: 5px;
+    background: rgba(0, 0, 0, .05);
+    border: 1px solid rgba(0, 0, 0, .05)
+}
+
+.standard-axes {}
+
+@media only screen and (max-width: 1000px) {
+    .column {
+        flex-basis: 33%;
+    }
+}
+
+@media only screen and (max-width: 800px) {
+
     .center {
         min-width: 0px;
         width: 40px;
@@ -202,6 +241,10 @@ body.controller.no-critical-errors.estop-disabled.power-on #z-control {
     .large {
         height: 55px;
         font-size: 25px;
+    }
+
+    .column {
+        flex-basis: 50%;
     }
 
 }

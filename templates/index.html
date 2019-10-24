@@ -46,56 +46,78 @@
             <label>File</label>
             <p id="current-file"></p>
             <p id="no-file-selected" class="error">No file selected. Please select a file</p>
-            <table id="status">
-                <caption>
-                    Status
-                </caption>
-                <thead>
-                    <tr>
-                        <th>ESTOP</th>
-                        <th>Power</th>
-                        <th>Interp state</th>
-                        <th>Task mode</th>
-                        <th>Spindle speed</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr id="status-tbody">
-                        <td class="success" id="estop-disabled">Disabled</td>
-                        <td class="error" id="estop-enabled">Enabled</td>
-                        <td class="success" id="power-on">On</td>
-                        <td class="error" id="power-off">Off</td>
-                        <td id="interp-idle">idle</td>
-                        <td id="interp-paused">paused</td>
-                        <td id="interp-waiting">waiting</td>
-                        <td id="interp-reading">reading</td>
-                        <td id="task-mdi">mdi</td>
-                        <td id="task-auto">auto</td>
-                        <td id="task-manual">manual</td>
-                        <td id="spindle-speed"></td>
-                    </tr>
-                </tbody>
-            </table>
 
-            <table id="3-axes-table">
-                <caption>
-                    Axes
-                </caption>
-                <thead>
-                    <tr id="thead_axes">
-                        <th>X</th>
-                        <th>Y</th>
-                        <th>Z</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr id="tbody_axes">
-                        <td id="x-axe">0</td>
-                        <td id="y-axe">0</td>
-                        <td id="z-axe">0</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class='row'>
+                <div class='column'>
+                    <div class='content'>
+                        <label>ESTOP</label>
+                        <p class="error" id="estop-enabled">enabled</p>
+                        <p class="success" id="estop-disabled">disabled</p>
+
+                    </div>
+                </div>
+                <div class='column'>
+                    <div class='content'>
+                        <label>POWER</label>
+                        <p class="success" id="power-on">enabled</p>
+                        <p class="error" id="power-off">disabled</p>
+                    </div>
+                </div>
+                <div class='column'>
+                    <div class='content'>
+                        <label>INTERP STATE</label>
+                        <p id="interp-idle">idle</p>
+                        <p id="interp-paused">paused</p>
+                        <p id="interp-waiting">waiting</p>
+                        <p id="interp-reading">reading</p>
+                    </div>
+                </div>
+                <div class='column'>
+                    <div class='content'>
+                        <label>TASK MODE</label>
+                        <p id="task-mdi">mdi</p>
+                        <p id="task-auto">auto</p>
+                        <p id="task-manual">manual</p>
+                    </div>
+                </div>
+                <div class='column'>
+                    <div class='content'>
+                        <label>RCS STATE</label>
+                        <p id="rcs-done">done</p>
+                        <p id="rcs-exec">exec</p>
+                        <p id="rcs-error">error</p>
+                    </div>
+                </div>
+                <div class='column'>
+                    <div class='content'>
+                        <label>SPINDLE SPEED</label>
+                        <p id="spindle-speed">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="standard-axes">
+                <div class='row'>
+                    <div class='column'>
+                        <div class='content'>
+                            <label>X</label>
+                            <p id="x-axe">0</p>
+                        </div>
+                    </div>
+                    <div class='column'>
+                        <div class='content'>
+                            <label>Y</label>
+                            <p id="y-axe">0</p>
+                        </div>
+                    </div>
+                    <div class='column'>
+                        <div class='content'>
+                            <label>Z</label>
+                            <p id="z-axe">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </section>
 
         <section id="controls">

@@ -79,7 +79,8 @@ class Machinekit {
                 file,
                 interp_state,
                 task_mode,
-                feedrate
+                feedrate,
+                rcs_state
             },
             spindle: {
                 spindle_speed,
@@ -139,6 +140,18 @@ class Machinekit {
                 break;
             case "MODE_AUTO":
                 document.body.classList.add("mode-auto");
+                break;
+        }
+
+        switch (rcs_state) {
+            case "RCS_DONE":
+                document.body.classList.add("rcs-done");
+                break;
+            case "RCS_EXEC":
+                document.body.classList.add("rcs-exec");
+                break;
+            case "RCS_ERROR":
+                document.body.classList.add("rcs-error");
                 break;
         }
 
