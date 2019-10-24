@@ -17,7 +17,11 @@ class Request {
             })
             .then((response) => response.json())
             .then((data) => data)
-            .catch((err) => console.log(err));
+            .catch((err) => {
+                return {
+                    "errors": err
+                }
+            });
     }
     post(url, data) {
         return fetch(this.api + url, {
@@ -44,7 +48,11 @@ class Request {
             })
             .then((response) => response.json())
             .then((data) => data)
-            .catch((err) => console.log(err));
+            .catch((err) => {
+                return {
+                    "errors": err
+                }
+            });
     }
 }
 
@@ -70,7 +78,7 @@ class Machinekit {
 
     async getMachineVitals() {
         const result = await this.request.get("/machinekit/status");
-
+        console.log(result);
         if ("errors" in result) {
             return this.errorHandler(result.errors);
         }
@@ -278,6 +286,12 @@ class Machinekit {
         if (error.message == "Machinekit is not running please restart machinekit and then the server!") {
             this.interval = 50000;
             document.body.className = "machinekit-down"
+            return;
+        }
+
+        if (error.message == "Failed to fetch") {
+            this.interval = 50000;
+            document.body.className = "server-down";
             return;
         }
         if (error.status == 403) {

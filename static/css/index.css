@@ -2,7 +2,8 @@
 #no-critical-errors,
 #machinekit-down,
 #no-file-selected,
-#invalid-api-key {
+#invalid-api-key,
+#server-down {
     display: none
 }
 
@@ -53,6 +54,7 @@
 }
 
 body.not-authorized #invalid-api-key,
+body.server-down #server-down,
 body.machinekit-down #machinekit-down,
 body.no-critical-errors.no-file-selected #no-file-selected {
     display: block;
