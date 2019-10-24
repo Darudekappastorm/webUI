@@ -184,7 +184,8 @@ body.controller.no-critical-errors.estop-disabled.power-on #z-control {
     width: 100%;
 }
 
-.column {
+.column,
+.column-axes {
     display: flex;
     flex-direction: column;
     flex-basis: 100%;
@@ -200,7 +201,9 @@ body.controller.no-critical-errors.estop-disabled.power-on #z-control {
 .standard-axes {}
 
 @media only screen and (max-width: 1000px) {
-    .column {
+
+    .column,
+    .column-axes {
         flex-basis: 33%;
     }
 }
@@ -247,4 +250,13 @@ body.controller.no-critical-errors.estop-disabled.power-on #z-control {
         flex-basis: 50%;
     }
 
+    .column-axes {
+        flex-basis: 100%;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    .optional {
+        display: none;
+    }
 }
