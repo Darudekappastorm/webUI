@@ -109,7 +109,7 @@ def update_file_queue():
     new_queue = data["new_queue"]
 
     for item in new_queue:
-        if not os.path.isfile(settings.UPLOAD_FOLDER + "/" + escape(item)):
+        if not os.path.isfile(config['storage']['upload_folder'] + "/" + escape(item)):
             raise NameError(errorMessages['6'])
 
     settings.file_queue = new_queue
@@ -147,7 +147,7 @@ def open_file():
 
     data = request.json
     name = escape(data["name"])
-    return controller.open_file(os.path.join(settings.UPLOAD_FOLDER + "/" + name))
+    return controller.open_file(os.path.join(config['storage']['upload_folder'] + "/" + name))
 
 
 @app.route("/server/file_upload", endpoint='upload', methods=["POST"])
@@ -174,10 +174,11 @@ def upload():
         cur.execute("""
             INSERT INTO files (file_name, file_location)
             VALUES (%s, %s)
-            """, (filename, settings.UPLOAD_FOLDER)
+            """, (filename, config['storage']['upload_folder'])
         )
         mysql.connection.commit()
-        file.save(os.path.join(settings.UPLOAD_FOLDER + "/" + filename))
+        file.save(os.path.join(config['storage']
+                               ['upload_folder'] + "/" + filename))
         return {"success": "file added"}
     except ValueError as e:
         print(e[0]['message'])
@@ -188,5 +189,6 @@ def upload():
 
 
 if __name__ == "__main__":
-    app.run('0.0.0.0', debug=True,
-            port=5000)
+    app.run('0.0.0.0',
+            debug=(True if config['server'].get('debug', False) else False),
+            port=config['server']['port'])

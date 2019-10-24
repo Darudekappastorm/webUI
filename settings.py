@@ -6,4 +6,3 @@ def init():
     machinekit_running = False
     controller = False
     file_queue = []
-    UPLOAD_FOLDER = '/home/machinekit/devel/webUI/files'
