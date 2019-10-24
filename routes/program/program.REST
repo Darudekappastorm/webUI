@@ -1,0 +1,11 @@
+@url = 192.168.1.116:5000
+@token = test_secret
+
+###
+POST http://{{url}}/machinekit/program
+API_KEY: {{token}}
+Content-Type: application/json
+
+{
+    "command": "stop"
+}

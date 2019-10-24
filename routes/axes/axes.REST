@@ -1,0 +1,32 @@
+@url = 192.168.1.116:5000
+@token = test_secret
+
+
+###
+POST http://{{url}}/machinekit/axes/home
+API_KEY: {{token}}
+Content-Type: application/json
+
+{
+    "command": "home"
+}
+
+###
+POST http://{{url}}/machinekit/position/mdi
+API_KEY: {{token}}
+Content-Type: application/json
+
+{
+    "command": "Y10 X5 Z30"
+}
+
+###
+POST http://{{url}}/machinekit/position/manual
+API_KEY: {{token}}
+Content-Type: application/json
+
+{
+    "axes": 0,
+    "speed": 1.2,
+    "increment": 5
+}

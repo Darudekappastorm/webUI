@@ -2,30 +2,36 @@ import os
 import sys
 import json
 import logging
-import linuxcnc
-import time
+import settings
+import configparser
 from flask_cors import CORS
 from flask_mysqldb import MySQL
+from decorators.auth import auth
 from werkzeug.utils import secure_filename
-from classes.machinekitController import MachinekitController
-from flask import Flask, request, jsonify, flash, redirect, url_for, send_from_directory
-# halcmd setp hal_manualtoolchange.change_button true
+from flask import Flask, request, redirect, abort, escape, render_template, jsonify
+from decorators.errors import errors
 
+from routes.axes.axes import axes
+from routes.status.status import status
+from routes.program.program import program
+from routes.spindle.spindle import spindle
+
+settings.init()
+
+config = configparser.ConfigParser()
+config.read("default.ini")
 app = Flask(__name__)
 CORS(app)
-
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'machinekit'
-app.config['MYSQL_DB'] = 'machinekit'
-api_token = "test_secret"
-
+app.config['MYSQL_HOST'] = config['mysql']['host']
+app.config['MYSQL_USER'] = config['mysql']['user']
+app.config['MYSQL_PASSWORD'] = config['mysql']['password']
+app.config['MYSQL_DB'] = config['mysql']['database']
 mysql = MySQL(app)
 
-UPLOAD_FOLDER = '/home/machinekit/devel/webUI/files'
-ALLOWED_EXTENSIONS = set(['nc'])
-
-port = 12345
+app.register_blueprint(axes)
+app.register_blueprint(status)
+app.register_blueprint(spindle)
+app.register_blueprint(program)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -35,63 +41,48 @@ formatter = logging.Formatter(
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
-file_queue = []
+with open("./jsonFiles/errorMessages.json") as f:
+    errorMessages = json.load(f)
+with open("./jsonFiles/halCommands.json") as f:
+    halCommands = json.load(f)
 
-try:
-    controller = MachinekitController()
-except Exception as e:
-    print("Machinekit is not running")
-    logger.critical(e)
-    sys.exit(1)
-
-
-def auth(f):
-    """ Decorator that checks if the machine returned any errors."""
-    def wrapper(*args, **kwargs):
-        headers = request.headers
-        auth = headers.get("API_KEY")
-        if auth != api_token:
-            return jsonify({"errors": "Not authorized"}), 400
-        else:
-            return f(*args, **kwargs)
-    wrapper.__name__ = f.__name__
-    return wrapper
-
-
-@app.route("/status", methods=["GET"])
-@auth
-def get_axis():
+if config['server']['mockup'] == 'true':
+    print("Mockup")
+    from mockup.machinekitController import MachinekitController
+    settings.controller = MachinekitController()
+    settings.machinekit_running = True
+else:
+    import linuxcnc
+    from classes.machinekitController import MachinekitController
     try:
-        return jsonify(controller.get_all_vitals())
-    except (Exception) as e:
-        if str(e) == "emcStatusBuffer invalid err=3":
-            logger.critical(e)
-            return jsonify(
-                {"errors": "Machinekit is not running please restart machinekit and then the server"}), 400
+        settings.controller = MachinekitController(
+            config["server"]["axis_config"])
+        settings.machinekit_running = True
+    except (linuxcnc.error) as e:
+        print("Machinekit is down please start machinekit and then restart the server")
+    except Exception as e:
         logger.critical(e)
-        return jsonify({
-            "errors": str(e)
-        }), 400
+        sys.exit({"errors": [e]})
 
 
-@app.route("/position", methods=["GET"])
+@app.route("/", methods=['GET'])
+def home():
+    """Landing page."""
+    feed_override = 120
+    spindle_override = 100
+    max_velocity = 3200
+    if config["server"]["mockup"] == 'false':
+        feed_override = (float(settings.controller.max_feed_override) * 100)
+        spindle_override = (
+            float(settings.controller.max_spindle_override) * 100)
+        max_velocity = settings.controller.max_velocity
+
+    return render_template('/index.html', max_feed_override=feed_override, max_spindle_override=spindle_override, maxvel=max_velocity)
+
+
+@app.route("/server/files", endpoint='return_files', methods=["GET"])
 @auth
-def get_position():
-    try:
-        return jsonify(controller.axes_position())
-    except (Exception) as e:
-        if str(e) == "emcStatusBuffer invalid err=3":
-            logger.critical(e)
-            return jsonify(
-                {"errors": "Machinekit is not running please restart machinekit and then the server"}), 400
-        logger.critical(e)
-        return jsonify({
-            "errors": str(e)
-        }), 400
-
-
-@app.route("/return_files", methods=["GET"])
-@auth
+@errors
 def return_files():
     try:
         cur = mysql.connection.cursor()
@@ -99,173 +90,76 @@ def return_files():
                     SELECT * FROM files
                     """)
         result = cur.fetchall()
-        return jsonify({"result": result, "file_queue": file_queue})
-
+        return {"result": result, "file_queue": settings.file_queue}
     except Exception as e:
-        return jsonify({"errors": str(e)}), 400
+        logger.critical(e)
+        return {"errors": errorMessages['9']}, 500
 
 
-@app.route("/set_machine_status", methods=["POST"])
+@app.route("/server/update_file_queue", endpoint='update_file_queue', methods=["POST"])
 @auth
-def set_status():
-    try:
-        data = request.json
-        command = data['command']
-        return jsonify(controller.machine_status(command))
-    except (KeyError, Exception) as e:
-        return jsonify({
-            "errors": str(e)
-        }), 400
-
-
-@app.route("/set_home", methods=["POST"])
-@auth
-def set_home_axes():
-    try:
-        data = request.json
-        command = data['command']
-        if command == "home":
-            return jsonify(controller.home_all_axes())
-        else:
-            return jsonify(controller.unhome_all_axes())
-    except Exception as e:
-        return jsonify({
-            "errors": str(e)
-        }), 400
-
-
-@app.route("/control_program", methods=["POST"])
-def control_program():
-    try:
-        data = request.json
-        command = data['command']
-        return jsonify(controller.run_program(command))
-    except Exception as e:
-        return jsonify({
-            "errors": str(e)
-        }), 400
-
-
-@app.route("/send_command", methods=["POST"])
-@auth
-def send_command():
-    try:
-        data = request.json
-        command = data["mdi_command"]
-        return jsonify(controller.mdi_command(command))
-    except (KeyError, Exception) as e:
-        return jsonify({
-            "errors": str(e)
-        }), 400
-
-
-@app.route("/manual", methods=["POST"])
-@auth
-def manual():
-    try:
-        data = request.json
-        axes = data['axes']
-        speed = data['speed']
-        increment = data['increment']
-        return jsonify(controller.manual_control(axes, speed, increment))
-    except (KeyError, Exception) as e:
-        return jsonify({
-            "errors": str(e)
-        }), 400
-
-
-@app.route("/spindle", methods=["POST"])
-@auth
-def spindle():
-    try:
-        data = request.json
-        command = data["command"]
-        if "spindle_brake" in command:
-            return jsonify(controller.spindle_brake(command["spindle_brake"]))
-        elif "spindle_direction" in command:
-            return jsonify(controller.spindle_direction(command["spindle_direction"]))
-        elif "spindle_override" in command:
-            return jsonify(controller.spindleoverride(command["spindle_override"]))
-        else:
-            return jsonify({"error": "Unknown command"})
-    except(KeyError, Exception) as e:
-        return jsonify({
-            "errors": str(e)
-        }), 400
-
-
-@app.route("/feed", methods=["POST"])
-@auth
-def feed():
-    try:
-        data = request.json
-        command = data["feedrate"]
-        return jsonify(controller.feedoverride(command))
-    except(KeyError, Exception) as e:
-        return jsonify({
-            "errors": str(e)
-        }), 400
-
-
-@app.route("/maxvel", methods=["POST"])
-@auth
-def maxvel():
-    try:
-        data = request.json
-        command = data["velocity"]
-        return jsonify(controller.maxvel(command))
-    except(KeyError, Exception) as e:
-        return jsonify({
-            "errors": str(e)
-        }), 400
-
-
-@app.route("/update_file_queue", methods=["POST"])
-@auth
+@errors
 def update_file_queue():
-    try:
-        global file_queue
-        data = request.json
-        new_queue = data["new_queue"]
-        file_queue = new_queue
-        return jsonify({"success": "Queue updated"})
-    except Exception as e:
-        return jsonify({"errors": e}), 400
+    if not "new_queue" in request.json:
+        raise ValueError(errorMessages['2'])
+    if not type(settings.file_queue) == list:
+        raise ValueError(errorMessages['5'])
+
+    data = request.json
+    new_queue = data["new_queue"]
+
+    for item in new_queue:
+        if not os.path.isfile(settings.UPLOAD_FOLDER + "/" + escape(item)):
+            raise NameError(errorMessages['6'])
+
+    settings.file_queue = new_queue
+    return {"success": "Queue updated"}
 
 
-@app.route("/tool_change", methods=["GET"])
+@app.route("/machinekit/halcmd", endpoint='halcmd', methods=["POST"])
 @auth
-def tool_changer():
-    try:
-        # Dirty fix to bypass toolchange prompt
-        os.system("halcmd setp hal_manualtoolchange.change_button true")
-        time.sleep(1)
-        os.system("halcmd setp hal_manualtoolchange.change_button false")
-        return jsonify({"success": "Command executed"})
-    except Exception as e:
-        return jsonify({"errors": e}), 400
+@errors
+def halcmd():
+    if not "halcmd" in request.json:
+        raise ValueError(errorMessages['2'])
+    command = request.json["halcmd"]
+    i_command = command.split(' ', 1)[0]
+
+    isInList = False
+    for item in halCommands:
+        if item['command'] == i_command:
+            isInList = True
+            break
+    if not isInList:
+        raise ValueError(errorMessages['8'])
+
+    os.system('halcmd ' + command + " > output.txt")
+    f = open("output.txt", "r")
+    return {"success": f.read()}
 
 
-@app.route("/open_file", methods=["POST"])
+@app.route("/machinekit/open_file", endpoint='open_file', methods=["POST"])
 @auth
+@errors
 def open_file():
-    try:
-        data = request.json
-        path = data["path"]
-        return jsonify(controller.open_file("/home/machinekit/devel/webUI/files/" + path))
-    except Exception as e:
-        return jsonify({"errors": e}), 400
+    if not "name" in request.json:
+        raise ValueError(errorMessages['2'])
+
+    data = request.json
+    name = escape(data["name"])
+    return controller.open_file(os.path.join(settings.UPLOAD_FOLDER + "/" + name))
 
 
-@app.route("/file_upload", methods=["POST"])
+@app.route("/server/file_upload", endpoint='upload', methods=["POST"])
 @auth
 def upload():
     try:
         if "file" not in request.files:
-            return "No file found"
+            raise ValueError(errorMessages['5'])
 
         file = request.files["file"]
         filename = secure_filename(file.filename)
+
         cur = mysql.connection.cursor()
         cur.execute(
             """
@@ -275,19 +169,24 @@ def upload():
         result = cur.fetchall()
 
         if len(result) > 0:
-            return jsonify({"errors": "File with given name already on server"}), 400
+            raise ValueError(errorMessages['7'])
 
         cur.execute("""
             INSERT INTO files (file_name, file_location)
             VALUES (%s, %s)
-            """, (filename, UPLOAD_FOLDER)
+            """, (filename, settings.UPLOAD_FOLDER)
         )
         mysql.connection.commit()
-        file.save(os.path.join(UPLOAD_FOLDER, filename))
-        return jsonify("File added to database and saved to folder")
+        file.save(os.path.join(settings.UPLOAD_FOLDER + "/" + filename))
+        return {"success": "file added"}
+    except ValueError as e:
+        print(e[0]['message'])
+        return {"errors": {"message": e[0]['message'], "type": e[0]["type"], "status": e[0]["status"]}}, e[0]["status"]
     except Exception as e:
-        return jsonify({"errors": e}), 400
+        logger.critical(e)
+        return {"errors": errorMessages['9']}, 500
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='192.168.1.116', port=5000)
+    app.run('0.0.0.0', debug=True,
+            port=5000)

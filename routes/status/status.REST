@@ -1,0 +1,43 @@
+@url = 192.168.1.116:5000
+@token = test_secret
+
+###
+GET http://{{url}}/machinekit/status
+API_KEY: {{token}}
+
+###
+GET http://{{url}}/machinekit/position
+API_KEY: {{token}}
+
+
+###
+POST http://{{url}}/machinekit/status
+API_KEY: {{token}}
+Content-Type: application/json
+
+{
+    "command": "power"
+}
+
+###
+POST http://{{url}}/machinekit/feed
+API_KEY: {{token}}
+Content-Type: application/json
+
+{
+    "command": 1.15
+}
+
+###
+POST http://{{url}}/machinekit/maxvel
+API_KEY: {{token}}
+Content-Type: application/json
+
+{
+    "command": 300
+}
+
+###
+GET http://{{url}}/machinekit/toolchange
+API_KEY: {{token}}
+Content-Type: application/json

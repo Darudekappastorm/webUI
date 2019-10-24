@@ -1,0 +1,34 @@
+@url = 192.168.1.116:5000
+@token = test_secret
+
+GET http://{{url}}
+
+###
+GET http://{{url}}/server/files
+API_KEY: {{token}}
+
+###
+POST http://{{url}}/server/update_file_queue
+API_KEY: {{token}}
+Content-Type: application/json
+
+{
+    "new_queue": ["smile.nc"]
+}
+
+###
+POST http://{{url}}/machinekit/open_file
+API_KEY: {{token}}
+Content-Type: application/json
+
+{
+    "name": "smile.nc"
+}
+###
+POST http://{{url}}/machinekit/halcmd
+API_KEY: {{token}}
+Content-Type: application/json
+
+{
+    "halcmd": "show"
+}

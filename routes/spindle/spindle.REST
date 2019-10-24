@@ -1,0 +1,49 @@
+@url = 192.168.1.116:5000
+@token = test_secret
+
+
+###
+POST http://{{url}}/machinekit/spindle/direction
+API_KEY: {{token}}
+Content-Type: application/json
+
+{
+    "command": "spindle_reverse"
+}
+
+
+###
+POST http://{{url}}/machinekit/spindle/enabled
+API_KEY: {{token}}
+Content-Type: application/json
+
+{
+    "command": "spindle_on"
+}
+
+###
+POST http://{{url}}/machinekit/spindle/speed
+API_KEY: {{token}}
+Content-Type: application/json
+
+{
+    "command": "spindle_decrease"
+}
+
+###
+POST http://{{url}}/machinekit/spindle/override
+API_KEY: {{token}}
+Content-Type: application/json
+
+{
+    "command": 1
+}
+
+###
+POST http://{{url}}/machinekit/spindle/brake
+API_KEY: {{token}}
+Content-Type: application/json
+
+{
+    "command": "brake_engaged"
+}

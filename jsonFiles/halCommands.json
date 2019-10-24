@@ -1,0 +1,129 @@
+[{
+        "command": "loadrt",
+        "description": ""
+    },
+    {
+        "command": "loadusr",
+        "description": ""
+    },
+    {
+        "command": "waitusr",
+        "description": ""
+    },
+    {
+        "command": "unload",
+        "description": ""
+    },
+    {
+        "command": "lock",
+        "description": ""
+    },
+    {
+        "command": "unlock",
+        "description": ""
+    },
+    {
+        "command": "net",
+        "description": ""
+    },
+    {
+        "command": "linkps",
+        "description": ""
+    },
+    {
+        "command": "linksp",
+        "description": ""
+    },
+    {
+        "command": "unlinkp",
+        "description": ""
+    },
+    {
+        "command": "newsig",
+        "description": ""
+    },
+    {
+        "command": "delsig",
+        "description": ""
+    },
+    {
+        "command": "setp",
+        "description": ""
+    },
+    {
+        "command": "getp",
+        "description": ""
+    },
+    {
+        "command": "ptype",
+        "description": ""
+    },
+    {
+        "command": "sets",
+        "description": ""
+    },
+    {
+        "command": "gets",
+        "description": ""
+    },
+    {
+        "command": "stype",
+        "description": ""
+    },
+    {
+        "command": "addf",
+        "description": ""
+    },
+    {
+        "command": "delf",
+        "description": ""
+    },
+    {
+        "command": "show",
+        "description": ""
+    },
+    {
+        "command": "list",
+        "description": ""
+    },
+    {
+        "command": "save",
+        "description": ""
+    },
+    {
+        "command": "status",
+        "description": ""
+    },
+    {
+        "command": "start",
+        "description": ""
+    },
+    {
+        "command": "stop",
+        "description": ""
+    },
+    {
+        "command": "source",
+        "description": ""
+    },
+    {
+        "command": "echo",
+        "description": ""
+    },
+    {
+        "command": "unecho",
+        "description": ""
+    },
+    {
+        "command": "quit",
+        "description": ""
+    },
+    {
+        "command": "exit",
+        "description": ""
+    },
+    {
+        "command": "help",
+        "description": ""
+    }
+]

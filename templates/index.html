@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>CNC Controller</title>
+    <script src="/static/javascript/machinekit.js"></script>
+    <link href="//css.underdark.nl/0.2/base.css" rel="stylesheet" />
+    <link href="//css.underdark.nl/0.2/layout.css" rel="stylesheet" />
+    <link href="//css.underdark.nl/0.2/module.css" rel="stylesheet" />
+    <link href="//css.underdark.nl/0.2/theme.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/index.css">
+    <script src="/static/javascript/sortable.js"></script>
+</head>
+
+<body>
+    <header id="nav">
+        <div>
+            <div class="logo">
+                <a href="/">CNC Controller</a>
+                <p>Webinterface voor CNC frees</p>
+            </div>
+            <nav>
+                <ul>
+                    <li><a onclick="machinekit.navigation('controller')">Controller</a></li>
+                    <li><a onclick="machinekit.navigation('file_manager')">File manager</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <section>
+            <label>Errors</label>
+            <div id="errors">
+                <p class="success" id="no-critical-errors">No critical errors</p>
+                <p class="error" id="machinekit-down">Machinekit is down. Start machinekit and then restart the server.
+                </p>
+                <p class="error" id="invalid-api-key">Invalid api key</p>
+            </div>
+            <div id="runtime-errors">
+            </div>
+        </section>
+        <section id="section-vitals">
+            <label>File</label>
+            <p id="current-file"></p>
+            <p id="no-file-selected" class="error">No file selected. Please select a file</p>
+
+            <div class='row'>
+                <div class='column'>
+                    <div class='content'>
+                        <label>ESTOP</label>
+                        <p class="error" id="estop-enabled">enabled</p>
+                        <p class="success" id="estop-disabled">disabled</p>
+
+                    </div>
+                </div>
+                <div class='column'>
+                    <div class='content'>
+                        <label>POWER</label>
+                        <p class="success" id="power-on">enabled</p>
+                        <p class="error" id="power-off">disabled</p>
+                    </div>
+                </div>
+                <div class='column optional'>
+                    <div class='content'>
+                        <label>INTERP STATE</label>
+                        <p id="interp-idle">idle</p>
+                        <p id="interp-paused">paused</p>
+                        <p id="interp-waiting">waiting</p>
+                        <p id="interp-reading">reading</p>
+                    </div>
+                </div>
+                <div class='column optional'>
+                    <div class='content'>
+                        <label>TASK MODE</label>
+                        <p id="task-mdi">mdi</p>
+                        <p id="task-auto">auto</p>
+                        <p id="task-manual">manual</p>
+                    </div>
+                </div>
+                <div class='column optional'>
+                    <div class='content'>
+                        <label>RCS STATE</label>
+                        <p id="rcs-done">done</p>
+                        <p id="rcs-exec">exec</p>
+                        <p id="rcs-error">error</p>
+                    </div>
+                </div>
+                <div class='column'>
+                    <div class='content'>
+                        <label>SPINDLE SPEED</label>
+                        <p id="spindle-speed">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="standard-axes">
+                <div class='row'>
+                    <div class='column-axes'>
+                        <div class='content'>
+                            <label>X</label>
+                            <p id="x-axe">0</p>
+                        </div>
+                    </div>
+                    <div class='column-axes'>
+                        <div class='content'>
+                            <label>Y</label>
+                            <p id="y-axe">0</p>
+                        </div>
+                    </div>
+                    <div class='column-axes'>
+                        <div class='content'>
+                            <label>Z</label>
+                            <p id="z-axe">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="controls">
+            <div class="tabs">
+                <label for="normal">Controls</label>
+                <label for="manual">Manual controls</label>
+
+                <input id="normal" type="radio" name="tabs_3" checked>
+                <div>
+                    <form onsubmit="event.preventDefault()">
+                        <div id="machine-estop">
+                            <label>ESTOP</label>
+                            <button class="button error" id="toggleEstopBtn"
+                                onClick="machinekit.clickHandler('/machinekit/status','estop')">
+                                TOGGLE ESTOP
+                            </button>
+                        </div>
+
+                        <div id="machine-power">
+                            <label>Power</label>
+                            <button class="button primary" id="togglePowerBtn"
+                                onClick="machinekit.clickHandler('/machinekit/status', 'power')">
+                                Toggle power
+                            </button>
+                        </div>
+
+                        <div id="machine-home-axes">
+                            <label>Axes</label>
+                            <button class="button primary"
+                                onClick="machinekit.clickHandler('/machinekit/axes/home','home')">
+                                Home
+                            </button>
+                            <button class="button primary"
+                                onClick="machinekit.clickHandler('/machinekit/axes/home','unhome')">
+                                Unhome
+                            </button>
+                        </div>
+
+
+                        <div id="program-control">
+                            <label>Program</label>
+                            <button class="button primary" id="program-start"
+                                onclick="machinekit.clickHandler('/machinekit/program','start')">
+                                Start
+                            </button>
+                            <button class="button primary" id="program-pause"
+                                onclick="machinekit.clickHandler('/machinekit/program','pause')">
+                                Pause
+                            </button>
+                            <button class="button primary" id="program-resume"
+                                onclick="machinekit.clickHandler('/machinekit/program','resume')">
+                                Resume
+                            </button>
+                            <button class="button error" id="program-stop"
+                                onclick="machinekit.clickHandler('/machinekit/program','stop')">
+                                Stop
+                            </button>
+                        </div>
+
+                        <div id="spindle-control">
+                            <label>Spindle</label>
+                            <button class="button primary" id="reverse"
+                                onclick="machinekit.clickHandler('/machinekit/spindle/direction','spindle_reverse')">
+                                reverse
+                            </button>
+                            <button class="button primary" id="forward"
+                                onclick="machinekit.clickHandler('/machinekit/spindle/direction','spindle_forward')">
+                                forward
+                            </button>
+                            <button class="button primary" id="brake"
+                                onclick="machinekit.clickHandler('/machinekit/spindle/brake','brake_engaged')">
+                                brake
+                            </button>
+                            <button class="button error" id="off"
+                                onclick="machinekit.clickHandler('/machinekit/spindle/enabled','spindle_off')">
+                                off
+                            </button>
+                        </div>
+
+                        <div id="spindle-speed-control">
+                            <label>Spindle speed</label>
+                            <button class="button primary"
+                                onclick="machinekit.clickHandler('/machinekit/spindle/speed','spindle_decrease')">
+                                -
+                            </button>
+                            <button class="button primary"
+                                onclick="machinekit.clickHandler('/machinekit/spindle/speed', 'spindle_increase')">
+                                +
+                            </button>
+                        </div>
+
+                        <div id="mdi-command">
+                            <label>MDI command</label>
+                            <input type="text" id="mdi-command-input" placeholder="X1 Y1 Z1" value="X0 Z0 Y0" />
+                            <button onclick="machinekit.clickHandler('/machinekit/position/mdi', 'MDI')">send</button>
+                        </div>
+
+                        <div id="feed-override-control">
+                            <label>Feed override</label>
+                            <input type="range" min="0" max="{{max_feed_override}}" value="0" onkeydown="return false;"
+                                onchange="machinekit.controlOverrides(this, '/machinekit/feed')" id="feed-override" />
+                            <span><output id="feed-override-output">120</output>%</span>
+                        </div>
+
+                        <div id="spindle-override-control">
+                            <label>Spindle override</label>
+                            <input type="range" min="0" max="{{max_spindle_override}}" value="0"
+                                onkeydown="return false;"
+                                onchange="machinekit.controlOverrides(this, '/machinekit/spindle/override')"
+                                id="spindle-override" />
+                            <span><output id="spindle-override-output">100</output>%</span>
+                        </div>
+
+                        <div id="max-velocity-control">
+                            <label>Max velocity</label>
+                            <input type="range" min="0" max="{{maxvel}}" value="0" onkeydown="return false;"
+                                onchange="machinekit.controlOverrides(this, '/machinekit/maxvel')" id="max-velocity" />
+                            <span><output id="max-velocity-output">3200</output></span>
+                        </div>
+                    </form>
+                </div>
+
+                <input id="manual" type="radio" name="tabs_3">
+                <div id="alternative-manual-control">
+                    <form onsubmit="event.preventDefault()">
+                        <div id="machine-estop-manual">
+                            <label>ESTOP</label>
+                            <button class="button error" id="toggleEstopBtn"
+                                onClick="machinekit.clickHandler('/machinekit/status','estop')">
+                                TOGGLE ESTOP
+                            </button>
+                        </div>
+
+                        <div id="machine-power-manual">
+                            <label>Power</label>
+                            <button class="button primary" id="togglePowerBtn"
+                                onClick="machinekit.clickHandler('/machinekit/status', 'power')">
+                                Toggle power
+                            </button>
+                        </div>
+
+                        <div id="xy-control">
+                            <button class="primary large"
+                                onclick="machinekit.manualControl('increment', 3, 'y')">▲</button>
+                            <button class="primary medium"
+                                onclick="machinekit.manualControl('increment', 2, 'y')">▲</button>
+                            <button class="primary" onclick="machinekit.manualControl('increment', 1, 'y')">▲</button>
+                            <div id="center-controls">
+                                <button class="warning large-horizontal"
+                                    onclick="machinekit.manualControl('increment', -3, 'x')">◄</button>
+                                <button class="warning medium-horizontal"
+                                    onclick="machinekit.manualControl('increment', -2, 'x')">◄</button>
+                                <button class="warning small-horizontal"
+                                    onclick="machinekit.manualControl('increment', -1, 'x')">◄</button>
+                                <button class="error center"
+                                    onClick="machinekit.clickHandler('/machinekit/status','estop')">E</button>
+                                <button class="warning small-horizontal"
+                                    onclick="machinekit.manualControl('increment', 1, 'x')">►</button>
+                                <button class="warning medium-horizontal"
+                                    onclick="machinekit.manualControl('increment', 2, 'x')">►</button>
+                                <button class="warning large-horizontal"
+                                    onclick="machinekit.manualControl('increment', 3, 'x')">►</button>
+
+                            </div>
+                            <button class="primary" onclick="machinekit.manualControl('increment', -1, 'y')">▼</button>
+                            <button class="primary medium"
+                                onclick="machinekit.manualControl('increment', -2, 'y')">▼</button>
+                            <button class="primary large"
+                                onclick="machinekit.manualControl('increment', -3, 'y')">▼</button>
+                        </div>
+                        <div id="z-control">
+                            <button class="info large"
+                                onclick="machinekit.manualControl('increment', 3, 'z')">▲</button>
+                            <button class="info medium"
+                                onclick="machinekit.manualControl('increment', 2, 'z')">▲</button>
+                            <button class="info" onclick="machinekit.manualControl('increment', 1, 'z')">▲</button>
+                            <button class="info" onclick="machinekit.manualControl('increment', -1, 'z')">▼</button>
+                            <button class="info medium"
+                                onclick="machinekit.manualControl('increment', -2, 'z')">▼</button>
+                            <button class="info large"
+                                onclick="machinekit.manualControl('increment', -3, 'z')">▼</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="file-manager">
+            <h2>File manager</h2>
+            <div id="filemanager_upload">
+                <h3>Upload file</h3>
+                <form onsubmit="event.preventDefault()">
+                    <input id="uploadFile" onchange="machinekit.getFileForUpload()" type="file" />
+                    <button onclick="machinekit.uploadFile()">upload</button>
+                </form>
+            </div>
+
+            <div id="filemanager_files_on_server">
+                <h3>Files on server</h3>
+                <table id="files">
+                    <caption>
+                        Files
+                    </caption>
+                    <thead id="thead_files">
+                        <tr>
+                            <th>Name</th>
+                            <th>Add to queue</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody_files">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="filemanager_files_in_queue">
+                <h3>File queue</h3>
+                <table id="queue">
+                    <caption>
+                        Queue
+                    </caption>
+                    <thead id="thead_queue">
+                        <tr>
+                            <th>Name</th>
+                            <th>Remove from queue</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="tbody_queue">
+                    </tbody>
+                </table>
+                <button class="primary" onclick="machinekit.updateFileQueueOnServer()">update</button>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

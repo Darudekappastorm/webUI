@@ -1,0 +1,57 @@
+{
+    "0": {
+        "message": "Machinekit is not running please restart machinekit and then the server!",
+        "status": 500,
+        "type": "InternalServerError"
+    },
+    "1": {
+        "message": "Authorization error. Invalid API key.",
+        "status": 403,
+        "type": "AuthorizationError"
+    },
+    "2": {
+        "message": "Unknown key",
+        "status": 400,
+        "type": "ValueError"
+    },
+    "3": {
+        "message": "Request cannot be empty",
+        "status": 400,
+        "type": "ValueError"
+    },
+    "4": {
+        "message": "Request can only be Content-Type: application/json",
+        "status": 415,
+        "type": "ValueError"
+    },
+    "5": {
+        "message": "New_queue must be of type list/array",
+        "status": 400,
+        "type": "ValueError"
+    },
+    "6": {
+        "message": "File not found",
+        "status": 404,
+        "type": "NameError"
+    },
+    "7": {
+        "message": "File with given name already on server",
+        "status": 400,
+        "type": "ValueError"
+    },
+    "8": {
+        "message": "Command not in list with hal commands",
+        "status": 404,
+        "type": "ValueError"
+    },
+    "9": {
+        "message": "Something went wrong",
+        "status": 500,
+        "type": "InternalServerError"
+    },
+    "10": {
+        "message": "Server was unable to decode the send data. Make sure you are sending valid JSON!",
+        "status": 400,
+        "type": "ValueError"
+    }
+}
