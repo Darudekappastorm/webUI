@@ -194,7 +194,7 @@ body.controller.no-critical-errors.estop-disabled.power-on #z-control {
 
 .content {
     background: rgba(0, 0, 0, .05);
-    border: 1px solid rgba(0, 0, 0, .05)
+    border: 1px solid rgba(0, 0, 0, .05);
 }
 
 .content p {
@@ -202,6 +202,9 @@ body.controller.no-critical-errors.estop-disabled.power-on #z-control {
     margin: 5px;
 }
 
+.column-axes p {
+    min-height: 80px;
+}
 
 @media only screen and (min-width: 801px) and (max-width: 1000px) {
 

@@ -56,8 +56,7 @@ class Machinekit {
 
     slowInterval = 2000
     fastInterval = 200;
-    interval = 2000;
-    isIntervalRunning = false;
+    interval = 100;
 
     file_queue = [];
     local_file_queue = [];
@@ -71,6 +70,7 @@ class Machinekit {
 
     async getMachineVitals() {
         const result = await this.request.get("/machinekit/status");
+
         if ("errors" in result) {
             return this.errorHandler(result.errors);
         }
@@ -316,24 +316,24 @@ class Machinekit {
     }
 
     controlInterval() {
-        if (!this.isIntervalRunning) {
-            this.isIntervalRunning = true;
-        }
-        if (this.page == "controller") {
-            this.getMachineVitals();
-            if (this.saveState == 1) {
-                if (this.oldState !== JSON.stringify(this.state.position) && this.oldState != undefined) {
-                    this.interval = this.fastInterval;
-                } else {
-                    if (this.interval != this.slowInterval) {
-                        this.interval = this.slowInterval
+        if (document.readyState != "loading") {
+            if (this.page == "controller") {
+                this.getMachineVitals();
+                if (this.saveState == 1) {
+                    if (this.oldState !== JSON.stringify(this.state.position) && this.oldState != undefined) {
+                        this.interval = this.fastInterval;
+                    } else {
+                        if (this.interval != this.slowInterval) {
+                            this.interval = this.slowInterval
+                        }
                     }
+                    this.oldState = JSON.stringify(this.state.position);
+                    this.saveState = 0;
                 }
-                this.oldState = JSON.stringify(this.state.position);
-                this.saveState = 0;
+                this.saveState++;
             }
-            this.saveState++;
         }
+
         setTimeout(this.controlInterval.bind(this), this.interval)
     }
 
@@ -499,4 +499,5 @@ class Machinekit {
         this.buildFileManagerPage();
     }
 }
+
 let machinekit = new Machinekit();
