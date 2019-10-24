@@ -31,7 +31,8 @@
 #controls,
 #xy-control,
 #z-control,
-#file-manager {
+#file-manager,
+#modal-warning {
     display: none;
 }
 
@@ -99,7 +100,8 @@ body.controller.no-critical-errors.estop-disabled.power-on.spindle-brake-disenga
 body.controller.no-critical-errors.estop-disabled.power-on #max-velocity-control,
 body.controller.no-critical-errors.estop-disabled.power-on #feed-override-control,
 body.controller.no-critical-errors.estop-disabled.power-on #spindle-override-control,
-body.controller.no-critical-errors.estop-disabled.power-on.homed.interp-idle #mdi-command {
+body.controller.no-critical-errors.estop-disabled.power-on.homed.interp-idle #mdi-command,
+body.controller.no-critical-errors.tool-change #modal-warning {
     display: flex;
 }
 

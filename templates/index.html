@@ -354,6 +354,22 @@
                 <button class="primary" onclick="machinekit.updateFileQueueOnServer()">update</button>
             </div>
         </section>
+
+        <input type="checkbox" id="modaltoggle-warning" hidden>
+        <div class="modal warning" id="modal-warning">
+            <aside>
+                <h2>Tool change</h2>
+                <p>Please change the tool in the machine</p>
+                <label for="modaltoggle-warning"><button id="tool-change-btn" class="primary"
+                        onclick="machinekit.toolChange()">Tool
+                        changed</button>
+                    <button class="button error" id="toggleEstopBtn"
+                        onClick="machinekit.clickHandler('/machinekit/status','estop')">
+                        TOGGLE ESTOP
+                    </button>
+                </label>
+            </aside>
+        </div>
     </main>
 </body>
 

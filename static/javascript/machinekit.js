@@ -97,7 +97,8 @@ class Machinekit {
                 interp_state,
                 task_mode,
                 feedrate,
-                rcs_state
+                rcs_state,
+                tool_change
             },
             spindle: {
                 spindle_speed,
@@ -113,10 +114,16 @@ class Machinekit {
         } = this.state;
         document.body.className = "controller no-critical-errors";
 
+        if (tool_change === 0) {
+            document.getElementById("modaltoggle-warning").checked = true;
+            document.body.classList.add("tool-change");
+        } else {
+            document.getElementById("modaltoggle-warning").checked = false;
+        }
+
         if (file) {
             document.getElementById("current-file").innerHTML = file;
             document.body.classList.add("file-selected");
-
         } else {
             document.body.classList.add("no-file-selected");
         }
@@ -294,7 +301,6 @@ class Machinekit {
             return;
         }
         if (error.status == 403) {
-            console.log("slowing interval. User not authorized");
             this.interval = 50000;
             document.body.className = "not-authorized"
             return;
@@ -350,7 +356,6 @@ class Machinekit {
         setTimeout(this.controlInterval.bind(this), this.interval)
     }
 
-    /*ALL BUTTON CLICK HANDLERS*/
     async clickHandler(url, command) {
         let result;
         if (command == "MDI") {
@@ -506,6 +511,14 @@ class Machinekit {
         const result = await this.request.post("/server/update_file_queue", {
             "new_queue": this.file_queue
         });
+        if ("errors" in result) {
+            return this.errorHandler(result.errors);
+        }
+        this.buildFileManagerPage();
+    }
+
+    async toolChange() {
+        const result = await this.request.get("/machinekit/toolchange");
         if ("errors" in result) {
             return this.errorHandler(result.errors);
         }
