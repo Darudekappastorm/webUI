@@ -204,7 +204,8 @@ body.controller.no-critical-errors.estop-disabled.power-on #z-control {
     margin: 5px;
 }
 
-.column-axes p {
+.column-axes p,
+.column p {
     min-height: 80px;
 }
 
@@ -258,10 +259,17 @@ body.controller.no-critical-errors.estop-disabled.power-on #z-control {
         flex-basis: calc(50% - 4px);
     }
 
+    .content label {
+        min-height: 50px;
+    }
 }
 
 @media only screen and (max-width: 600px) {
     .optional {
         display: none;
+    }
+
+    .content label {
+        min-height: 50px;
     }
 }
