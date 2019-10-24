@@ -33,8 +33,18 @@ class Request {
             .then((data) => data)
             .catch((err) => console.log(err));
     }
-    update() {
-
+    upload(url, data) {
+        return fetch(this.api + url, {
+                method: "POST",
+                headers: {
+                    "API_KEY": this.api_key,
+                },
+                mode: "cors",
+                body: data
+            })
+            .then((response) => response.json())
+            .then((data) => data)
+            .catch((err) => console.log(err));
     }
 }
 
@@ -420,6 +430,57 @@ class Machinekit {
     removeFileFromQueue(index) {
         this.file_queue.splice(index, 1);
         this.renderFileQueue();
+    }
+
+    getFileForUpload() {
+        const fileList = document.getElementById("uploadFile");
+        if ("files" in fileList) {
+            const file = fileList.files[0];
+
+            if (file == undefined) {
+                return this.errorHandler({
+                    "message": "Please select a file"
+                });
+            }
+
+            if (!file.name) {
+                return this.errorHandler({
+                    "message": "File name cannot be empty"
+                });
+            }
+            const lastDot = file.name.lastIndexOf(".");
+            const ext = file.name.substring(lastDot + 1);
+
+            if (ext === "nc" || ext === "gcode") {
+                this.file = file;
+
+                return;
+            } else {
+                return this.errorHandler({
+                    "message": "Filetype is not allowed. Please select a file with one of the following types: '.nc, .gcode'"
+                });
+            }
+        }
+    }
+
+    async uploadFile() {
+        if (this.file == null) {
+            return this.errorHandler({
+                "message": "Please select a file"
+            });
+        }
+        let formData = new FormData();
+        formData.append("file", this.file);
+
+        const result = await this.request.upload("/server/file_upload",
+            formData
+        );
+
+        if ("errors" in result) {
+            return this.errorHandler(result.errors);
+        }
+
+        this.getMachineVitals();
     }
 
     async updateFileQueueOnServer() {

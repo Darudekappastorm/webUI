@@ -55,7 +55,8 @@ else:
     import linuxcnc
     from classes.machinekitController import MachinekitController
     try:
-        settings.controller = MachinekitController(config["server"]["axis_config"])
+        settings.controller = MachinekitController(
+            config["server"]["axis_config"])
         settings.machinekit_running = True
     except (linuxcnc.error) as e:
         print("Machinekit is down please start machinekit and then restart the server")
@@ -72,7 +73,8 @@ def home():
     max_velocity = 3200
     if config["server"]["mockup"] == 'false':
         feed_override = (float(settings.controller.max_feed_override) * 100)
-        spindle_override = (float(settings.controller.max_spindle_override) * 100)
+        spindle_override = (
+            float(settings.controller.max_spindle_override) * 100)
         max_velocity = settings.controller.max_velocity
 
     return render_template('/index.html', max_feed_override=feed_override, max_spindle_override=spindle_override, maxvel=max_velocity)
@@ -150,7 +152,6 @@ def open_file():
 
 @app.route("/server/file_upload", endpoint='upload', methods=["POST"])
 @auth
-@errors
 def upload():
     try:
         if "file" not in request.files:
@@ -158,6 +159,7 @@ def upload():
 
         file = request.files["file"]
         filename = secure_filename(file.filename)
+
         cur = mysql.connection.cursor()
         cur.execute(
             """
@@ -177,6 +179,9 @@ def upload():
         mysql.connection.commit()
         file.save(os.path.join(settings.UPLOAD_FOLDER + "/" + filename))
         return {"success": "file added"}
+    except ValueError as e:
+        print(e[0]['message'])
+        return {"errors": {"message": e[0]['message'], "type": e[0]["type"], "status": e[0]["status"]}}, e[0]["status"]
     except Exception as e:
         logger.critical(e)
         return {"errors": errorMessages['9']}, 500

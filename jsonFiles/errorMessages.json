@@ -45,7 +45,7 @@
         "type": "ValueError"
     },
     "9": {
-        "message": "Something went wrong with the database. Please contact us.",
+        "message": "Something went wrong",
         "status": 500,
         "type": "InternalServerError"
     },

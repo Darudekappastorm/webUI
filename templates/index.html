@@ -311,8 +311,8 @@
             <div id="filemanager_upload">
                 <h3>Upload file</h3>
                 <form onsubmit="event.preventDefault()">
-                    <input id="uploadFile" onchange="getFile()" type="file" />
-                    <button onclick="fUpload()">upload</button>
+                    <input id="uploadFile" onchange="machinekit.getFileForUpload()" type="file" />
+                    <button onclick="machinekit.uploadFile()">upload</button>
                 </form>
             </div>
 

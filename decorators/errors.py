@@ -14,6 +14,7 @@ def errors(f):
     def errorWrapper(*args, **kwargs):
         try:
             if request.method == "POST":
+                print(request.json)
                 if not request.json:
                     raise ValueError(errorMessages['4'])
             if settings.machinekit_running == False:
@@ -21,6 +22,7 @@ def errors(f):
             return f(*args, **kwargs)
 
         except ValueError as e:
+
             if type(e.message) == str:
                 return {"errors": {"message": e.message, "status": 400, "type": "ValueError"}}, 400
             else:
