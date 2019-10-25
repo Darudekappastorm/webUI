@@ -165,44 +165,10 @@ class Machinekit {
             document.body.classList.add("estop-disabled");
         }
 
-        switch (interp_state) {
-            case "INTERP_IDLE":
-                document.body.classList.add("interp-idle");
-                break;
-            case "INTERP_PAUSED":
-                document.body.classList.add("interp-paused");
-                break;
-            case "INTERP_WAITING":
-                document.body.classList.add("interp-waiting");
-                break;
-            case "INTERP_READING":
-                document.body.classList.add("interp-reading");
-                break;
-        }
+        document.body.classList.add(interp_state.toLowerCase().replace("_", "-"));
+        document.body.classList.add(task_mode.toLowerCase().replace("_", "-"));
+        document.body.classList.add(rcs_state.toLowerCase().replace("_", "-"));
 
-        switch (task_mode) {
-            case "MODE_MDI":
-                document.body.classList.add("mode-mdi");
-                break;
-            case "MODE_MANUAL":
-                document.body.classList.add("mode-manual");
-                break;
-            case "MODE_AUTO":
-                document.body.classList.add("mode-auto");
-                break;
-        }
-
-        switch (rcs_state) {
-            case "RCS_DONE":
-                document.body.classList.add("rcs-done");
-                break;
-            case "RCS_EXEC":
-                document.body.classList.add("rcs-exec");
-                break;
-            case "RCS_ERROR":
-                document.body.classList.add("rcs-error");
-                break;
-        }
 
         document.getElementById("spindle-speed").innerHTML = spindle_speed;
         let axesHomed = 0;
@@ -315,9 +281,6 @@ class Machinekit {
     }
 
     errorHandler(error) {
-        // if (this.displayedErrors.includes(error.message)) {
-        //     return;
-        // }
         if (error.message == "Machinekit is not running please restart machinekit and then the server!") {
             this.interval = 50000;
             document.body.className = "machinekit-down"
