@@ -31,7 +31,7 @@ class Request {
                     "API_KEY": this.api_key,
                 },
                 mode: "cors",
-                body: JSON.stringify(data)
+                body: (data)
             })
             .then((response) => response.json())
             .then((data) => data)
@@ -58,7 +58,7 @@ class Request {
 
 class Machinekit {
     state = {}
-    displayedErrors = [];
+    displayedErrors = new Set();
     page = "controller";
     saveState = 1;
 
@@ -286,9 +286,9 @@ class Machinekit {
     }
 
     errorHandler(error) {
-        if (this.displayedErrors.includes(error.message)) {
-            return;
-        }
+        // if (this.displayedErrors.includes(error.message)) {
+        //     return;
+        // }
         if (error.message == "Machinekit is not running please restart machinekit and then the server!") {
             this.interval = 50000;
             document.body.className = "machinekit-down"
@@ -306,20 +306,21 @@ class Machinekit {
             return;
         }
 
-        this.displayedErrors.push(error.message);
+        this.displayedErrors.add(error.message);
         this.renderErrors();
     }
 
     renderErrors() {
         const errorElement = document.getElementById("runtime-errors");
         errorElement.innerHTML = "";
-        this.displayedErrors.map((value, index) => {
-            errorElement.innerHTML += `<p class="error" id="error_executing">${value}<button class="error" id="error-${index}" onclick="machinekit.deleteError(${index})">x</button></p>`;
-        });
+        for (const error of this.displayedErrors) {
+            errorElement.innerHTML += `<p class="error" id="error_executing">${error}<button class="error" onclick="machinekit.deleteError('${error}')">x</button></p>`;
+        }
+
     }
 
-    deleteError(index) {
-        this.displayedErrors.splice(index, 1);
+    deleteError(val) {
+        this.displayedErrors.delete(val);
         this.renderErrors();
     }
 
