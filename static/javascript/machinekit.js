@@ -31,7 +31,7 @@ class Request {
                     "API_KEY": this.api_key,
                 },
                 mode: "cors",
-                body: (data)
+                body: JSON.stringify(data)
             })
             .then((response) => response.json())
             .then((data) => data)
