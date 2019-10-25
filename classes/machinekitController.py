@@ -17,6 +17,7 @@ class MachinekitController():
     """ The Machinekit python interface in a class """
 
     def __init__(self, ini):
+            """ Construct the class. Read values from passed .ini file"""
             self.s = linuxcnc.stat()
             self.c = linuxcnc.command()
             self.e = linuxcnc.error_channel()
@@ -31,6 +32,7 @@ class MachinekitController():
 
 
     def set_axes(self):
+        """Turn axe numbers into alphabetic values"""
         self.s.poll()
         axesDict = {
             0: "x", 
@@ -51,6 +53,7 @@ class MachinekitController():
         return axesInMachine
 
     def interp_state(self):
+        """Return current interp state of machine. Ex: INTERP_IDLE"""
         self.s.poll()
         modes = ["INTERP_IDLE", "INTERP_READING",
             "INTERP_PAUSED", "INTERP_WAITING"]
@@ -72,7 +75,7 @@ class MachinekitController():
         return self.axes_with_cords
 
     def errors(self):
-        """ Check the machine error channel """
+        """Read the error channel, return latest error as response and create an error list with all errors."""
         error = self.e.poll()
         if error:
             kind, text = error
@@ -97,10 +100,12 @@ class MachinekitController():
         return not self.s.estop and self.s.enabled and self.s.homed and (self.s.interp_state == linuxcnc.INTERP_IDLE)
 
     def rcs_state(self):
+        """ Return current rcs-state of the machine as string. Ex: RCS_DONE"""
         modes = ["RCS_DONE", "RCS_EXEC", "RCS_ERROR"]
         return modes[self.s.state -1]
 
     def get_all_vitals(self):
+        """Return most important machine values as dict"""
         self.s.poll()
         return {
             "power": {
@@ -137,7 +142,7 @@ class MachinekitController():
     # SETTERS
     @checkerrors
     def machine_status(self, command):
-        """ Toggle estop and power with command estop || power"""
+        """ Toggle power/estop. takes 'estop' or 'power' as command"""
         if command != "estop" and command != "power":
             raise ValueError({"message": "Unknown command " + command, "status": 400, "type": "ValueError"})
 
@@ -191,7 +196,7 @@ class MachinekitController():
 
     @checkerrors
     def home_all_axes(self, command):
-        """ Set all axes home """
+        """ Return all axes to the home position """
         if command != "home" and command != "unhome":
             raise ValueError({"message": "Unknown command " + command, "status": 400, "type": "ValueError"})
       
@@ -212,7 +217,7 @@ class MachinekitController():
         return self.errors()
 
     def run_program(self, command):
-        """ Command = start || pause || stop || resume = default"""
+        """ Run the current file. Takes command as start || pause || stop || default=resume"""
         if command != "start" and command != "pause" and command != "stop" and command != "resume":
             raise ValueError(
                 {"message": "Unknown command " + command, "status": 400, "type": "ValueError"})
@@ -220,7 +225,7 @@ class MachinekitController():
         self.ensure_mode(linuxcnc.MODE_AUTO, linuxcnc.MODE_MDI)
 
         if command == "start":
-            return self.task_run(9)
+            return self.task_run()
         elif command == "pause":
             return self.task_pause()
         elif command == "stop":
@@ -229,13 +234,13 @@ class MachinekitController():
             return self.task_resume()
 
     @checkerrors
-    def task_run(self, start_line):
-        """ Run program from line """
+    def task_run(self):
+        """ Run program from line 0"""
         self.s.poll()
         if self.s.task_mode not in (linuxcnc.MODE_AUTO, linuxcnc.MODE_MDI) or self.s.interp_state in (linuxcnc.INTERP_READING, linuxcnc.INTERP_WAITING, linuxcnc.INTERP_PAUSED):
             return {"errors": "Can't start machine because it is currently running or paused in a project"}
         self.ensure_mode(linuxcnc.MODE_AUTO)
-        self.c.auto(linuxcnc.AUTO_RUN, 9)
+        self.c.auto(linuxcnc.AUTO_RUN, 0)
     
         return self.errors()
 

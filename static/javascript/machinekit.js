@@ -147,11 +147,6 @@ class Machinekit {
                     "name": ""
                 });
             }
-            // if (!this.state.program.file || this.state.program.file != this.file_queue[0] && this.file_queue.length > 0) {
-            //     this.request.post("/machinekit/open_file", {
-            //         "name": this.file_queue[0]
-            //     });
-            // }
         }
 
 
