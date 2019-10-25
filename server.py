@@ -147,7 +147,7 @@ def open_file():
 
     data = request.json
     name = escape(data["name"])
-    return controller.open_file(os.path.join(config['storage']['upload_folder'] + "/" + name))
+    return settings.controller.open_file(config['storage']['upload_folder'], name)
 
 
 @app.route("/server/file_upload", endpoint='upload', methods=["POST"])
@@ -181,7 +181,6 @@ def upload():
                                ['upload_folder'] + "/" + filename))
         return {"success": "file added"}
     except ValueError as e:
-        print(e[0]['message'])
         return {"errors": {"message": e[0]['message'], "type": e[0]["type"], "status": e[0]["status"]}}, e[0]["status"]
     except Exception as e:
         logger.critical(e)

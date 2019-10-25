@@ -42,7 +42,6 @@ class linuxcnc():
     BRAKE_RELEASE = 0
     class stat():
         def __init__(self):
-            print("Hello from stat")
             self.axes = 3
             self.enabled = 1
             self.estop = linuxcnc.STATE_ESTOP_RESET
@@ -71,12 +70,6 @@ class linuxcnc():
             self.max_acceleration = 5000
             self.pocket_prepped = -1
 
-        def state(self, command):
-            if command == "power":
-                print(self.power)
-            else:
-                print(self.estop)
-
         def poll(self):
             return True
 
@@ -91,17 +84,16 @@ class linuxcnc():
 
     class command():
         def __init__(self):
-            print("Hello from command")
-        
+            """"""
         def wait_complete(self):
             return True
         
         def state(self, command):
-            print()
+            return
 
     class error_channel():
         def __init__(self):
-            print("Hello from error channel")
+            """"""
 
         def poll(self):
             return True
@@ -227,7 +219,7 @@ class MachinekitController():
         if command == "power":
             if self.s.estop == linuxcnc.STATE_ESTOP:
                 return {"errors": "Can't turn on machine while it is in E_STOP modus"}
-            print(self.s.enabled)
+         
             if self.s.enabled:
                 self.s.enabled = linuxcnc.STATE_DISABLED
             else:
@@ -243,10 +235,12 @@ class MachinekitController():
         self.s.poll()
         if self.s.interp_state is not linuxcnc.INTERP_IDLE:
             return {"errors": "Cannot execute command when machine interp state isn't idle"}
+
         i = 0
         axe = 1
         lastMatch = 0
         values = []
+
         for letter in command:
             i += 1
             if letter == "X" or letter == "Y" or letter == "Z":

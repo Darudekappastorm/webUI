@@ -58,7 +58,7 @@ class Request {
 
 class Machinekit {
     state = {}
-    displayedErrors = new Set();
+    displayedErrors = [];
     page = "controller";
 
     slowInterval = 2000
@@ -70,11 +70,19 @@ class Machinekit {
     files_on_server = [];
     firstConnect = true;
 
+
+
     constructor() {
         this.request = new Request();
         this.getFilesFromServer();
         this.controlInterval();
         this.page = localStorage.getItem("page");
+        console.log(this.testqueue.setQueue = "test");
+
+        console.log(this.testqueue.queue);
+        console.log(this.testqueue.splice);
+
+
     }
 
     async getMachineVitals() {
@@ -106,7 +114,24 @@ class Machinekit {
                 this.interval = this.fastInterval;
 
             }
+
+            if (this.state.program.rcs_state === "RCS_EXEC" && result.program.rcs_state === "RCS_DONE") {
+                this.file_queue.splice(0, 1);
+                // this.request.post("/server/update_file_queue", {
+                //     "new_queue": this.file_queue
+                // });
+                let file = this.file_queue[0];
+                if (!file) {
+                    file = "";
+                }
+                console.log(file);
+
+                this.request.post("/machinekit/open_file", {
+                    "name": file
+                });
+            }
         }
+
         const wholeState = JSON.stringify(this.state);
         const wholeNewState = JSON.stringify(result);
         return (wholeState === wholeNewState);
@@ -150,6 +175,7 @@ class Machinekit {
             document.getElementById("current-file").innerHTML = file;
             document.body.classList.add("file-selected");
         } else {
+            document.getElementById("current-file").innerHTML = "";
             document.body.classList.add("no-file-selected");
         }
 
@@ -281,6 +307,9 @@ class Machinekit {
     }
 
     errorHandler(error) {
+        if (this.displayedErrors.includes(error.message)) {
+            return;
+        }
         if (error.message == "Machinekit is not running please restart machinekit and then the server!") {
             this.interval = 50000;
             document.body.className = "machinekit-down"
@@ -298,21 +327,21 @@ class Machinekit {
             return;
         }
 
-        this.displayedErrors.add(error.message);
+        this.displayedErrors.push(error.message);
         this.renderErrors();
     }
 
     renderErrors() {
         const errorElement = document.getElementById("runtime-errors");
         errorElement.innerHTML = "";
-        for (const error of this.displayedErrors) {
-            errorElement.innerHTML += `<p class="error" id="error_executing">${error}<button class="error" onclick="machinekit.deleteError('${error}')">x</button></p>`;
-        }
+        this.displayedErrors.map((value, index) => {
+            errorElement.innerHTML += `<p class="error" id="error_executing">${value}<button class="error" id="error-${index}" onclick="machinekit.deleteError(${index})">x</button></p>`;
+        });
 
     }
 
-    deleteError(val) {
-        this.displayedErrors.delete(val);
+    deleteError(index) {
+        this.displayedErrors.splice(index, 1);
         this.renderErrors();
     }
 

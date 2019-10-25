@@ -22,7 +22,7 @@ API_KEY: {{token}}
 Content-Type: application/json
 
 {
-    "name": "smile.nc"
+    "name": "test.nc"
 }
 ###
 POST http://{{url}}/machinekit/halcmd

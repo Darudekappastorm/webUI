@@ -17,7 +17,7 @@ API_KEY: {{token}}
 Content-Type: application/json
 
 {
-    "command": "Y10 X5 Z30"
+    "command": "Y10 X5 Z31"
 }
 
 ###

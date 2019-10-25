@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import linuxcnc
 import sys
+import os
 
 def checkerrors(f):
     """ Decorator that checks if the machine returned any errors."""
@@ -22,13 +23,12 @@ class MachinekitController():
             self.axes = self.set_axes()
             self.axes_with_cords = {}
             self.ini = linuxcnc.ini(ini)
+            self.errorList = []
             
             self.max_feed_override = self.ini.find("DISPLAY", "MAX_FEED_OVERRIDE")
             self.max_spindle_override = self.ini.find("DISPLAY", "MAX_SPINDLE_OVERRIDE")
             self.max_velocity = self.s.max_velocity * 60
 
-
-    # Class is split up in getters and setters 
 
     def set_axes(self):
         self.s.poll()
@@ -83,6 +83,10 @@ class MachinekitController():
                 typus, text
 
         if error is not None:
+            if len(self.errorList) >= 50:
+                self.errorList = []
+                
+            self.errorList.append(error[1])
             return {"errors": error[1]}
         else:
             return {}
@@ -159,7 +163,6 @@ class MachinekitController():
 
     @checkerrors
     def mdi_command(self, command):
-        print("called")
         """ Send a MDI movement command to the machine, example "Y1 X1 Z-1" """
         # Check if the machine is ready for mdi commands
         self.s.poll()
@@ -397,17 +400,24 @@ class MachinekitController():
         return self.errors()
 
     @checkerrors
-    def open_file(self, path):
+    def open_file(self, path, fileName):
         """ Open file in the /files dir on the beagleboi """ 
         self.s.poll()
 
         if self.s.interp_state is not linuxcnc.INTERP_IDLE:
             return {"errors": "Cannot execute command when interp is not idle"}
 
+    
         self.ensure_mode(linuxcnc.MODE_MDI)
+   
+        if not fileName:
+            self.c.reset_interpreter()
+            self.c.wait_complete()
+            return self.errors()
+
         self.c.reset_interpreter()
         self.c.wait_complete()
-        self.c.program_open(path)
+        self.c.program_open(os.path.join(path + "/" + fileName))
         self.c.wait_complete()
 
         return self.errors()
