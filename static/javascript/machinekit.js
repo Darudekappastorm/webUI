@@ -77,10 +77,7 @@ class Machinekit {
         this.getFilesFromServer();
         this.controlInterval();
         this.page = localStorage.getItem("page");
-        console.log(this.testqueue.setQueue = "test");
 
-        console.log(this.testqueue.queue);
-        console.log(this.testqueue.splice);
 
 
     }
