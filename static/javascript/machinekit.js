@@ -60,7 +60,6 @@ class Machinekit {
     state = {}
     displayedErrors = new Set();
     page = "controller";
-    saveState = 1;
 
     slowInterval = 2000
     fastInterval = 200;
@@ -69,9 +68,11 @@ class Machinekit {
     file_queue = [];
     local_file_queue = [];
     files_on_server = [];
+    firstConnect = true;
 
     constructor() {
         this.request = new Request();
+        this.getFilesFromServer();
         this.controlInterval();
         this.page = localStorage.getItem("page");
     }
@@ -81,11 +82,35 @@ class Machinekit {
         if ("errors" in result) {
             return this.errorHandler(result.errors);
         }
+        const isSameState = this.controlintervalSpeedAndCompareStates(result);
         this.state = result;
 
-        this.buildControllerPage();
+        //Only update the page classes if the states are not exactly the same
+        if (!isSameState) {
+            this.buildControllerPage();
+        }
     }
 
+    controlintervalSpeedAndCompareStates(result) {
+        if (this.firstConnect) {
+            this.firstConnect = false;
+        } else {
+            const oldState = JSON.stringify(this.state.position);
+            const newState = JSON.stringify(result.position);
+
+            if (oldState === newState) {
+                if (this.interval != this.slowInterval) {
+                    this.interval = this.slowInterval
+                }
+            } else {
+                this.interval = this.fastInterval;
+
+            }
+        }
+        const wholeState = JSON.stringify(this.state);
+        const wholeNewState = JSON.stringify(result);
+        return (wholeState === wholeNewState);
+    }
     buildControllerPage() {
         const {
             power: {
@@ -242,8 +267,7 @@ class Machinekit {
         document.getElementById("max-velocity-output").innerHTML = Math.round((velocity * 60));
     }
 
-    async fileManager() {
-        document.body.className = "filemanager no-critical-errors";
+    async getFilesFromServer() {
         const result = await this.request.get("/server/files");
         if ("errors" in result) {
             return this.errorHandler(result.errors);
@@ -251,6 +275,11 @@ class Machinekit {
 
         this.file_queue = result.file_queue;
         this.files_on_server = result.result;
+    }
+
+    async fileManager() {
+        document.body.className = "filemanager no-critical-errors";
+        await this.getFilesFromServer();
         this.buildFileManagerPage();
     }
 
@@ -329,8 +358,10 @@ class Machinekit {
         this.page = page;
 
         if (page == "controller") {
+            this.state.page = "controller";
             this.getMachineVitals();
         } else {
+            this.state.page = "filemanager";
             this.fileManager();
         }
     }
@@ -339,18 +370,6 @@ class Machinekit {
         if (document.readyState != "loading") {
             if (this.page == "controller") {
                 this.getMachineVitals();
-                if (this.saveState == 1) {
-                    if (this.oldState !== JSON.stringify(this.state.position) && this.oldState != undefined) {
-                        this.interval = this.fastInterval;
-                    } else {
-                        if (this.interval != this.slowInterval) {
-                            this.interval = this.slowInterval
-                        }
-                    }
-                    this.oldState = JSON.stringify(this.state.position);
-                    this.saveState = 0;
-                }
-                this.saveState++;
             }
         }
 
