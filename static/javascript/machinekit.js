@@ -7,6 +7,7 @@ window.onload = async () => {
 class Request {
     api = "http://192.168.1.116:5000";
     api_key = "test_secret";
+    fetching = false;
 
     get(url) {
         return fetch(this.api + url, {
@@ -24,18 +25,31 @@ class Request {
             });
     }
     post(url, data) {
-        return fetch(this.api + url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "API_KEY": this.api_key,
-                },
-                mode: "cors",
-                body: JSON.stringify(data)
-            })
-            .then((response) => response.json())
-            .then((data) => data)
-            .catch((err) => console.log(err));
+        if (this.fetching) {
+            return {
+                "errors": {
+                    "message": "Request has not been processed yet"
+                }
+            }
+        } else {
+            this.fetching = true;
+            return fetch(this.api + url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "API_KEY": this.api_key,
+                    },
+                    mode: "cors",
+                    body: JSON.stringify(data)
+                })
+                .then((response) => {
+                    this.fetching = false;
+                    return response.json()
+                })
+                .then((data) => data)
+                .catch((err) => console.log(err));
+        }
+
     }
     upload(url, data) {
         return fetch(this.api + url, {
@@ -76,6 +90,15 @@ class Machinekit {
         this.controlInterval();
     }
 
+    controlInterval() {
+        if (document.readyState != "loading") {
+            if (this.page == "controller") {
+                this.getMachineVitals();
+            }
+        }
+        setTimeout(this.controlInterval.bind(this), this.interval)
+    }
+
     async getMachineVitals() {
         const result = await this.request.get("/machinekit/status");
         if ("errors" in result) {
@@ -88,13 +111,11 @@ class Machinekit {
         if (!isSameState) {
             this.buildControllerPage();
         }
-
     }
 
     controlintervalSpeedAndCompareStates(result) {
         //On first connect there is nothing to compare
         if (this.firstConnect) {
-            this.firstConnect = false;
             if (this.file_queue.length > 0) {
                 this.request.post("/machinekit/open_file", {
                     "name": this.file_queue[0]
@@ -104,6 +125,7 @@ class Machinekit {
                     "name": ""
                 });
             }
+            this.firstConnect = false;
         } else {
             //Compare if state of axes is same. If not machine is moving so we want faster data
             const oldState = JSON.stringify(this.state.position);
@@ -139,18 +161,19 @@ class Machinekit {
                     });
                 }
             }
+
             if (!this.state.program.file && this.file_queue.length > 0) {
                 this.request.post("/machinekit/open_file", {
                     "name": this.file_queue[0]
                 });
             }
-
         }
 
         const wholeState = JSON.stringify(this.state);
         const wholeNewState = JSON.stringify(result);
         return (wholeState === wholeNewState);
     }
+
     buildControllerPage() {
         const {
             power: {
@@ -215,28 +238,19 @@ class Machinekit {
         let axesHomed = 0;
         const totalAxes = Object.keys(position).length;
 
-        if (totalAxes === 3) {
-            for (const axe in position) {
-                let homed = "";
-                let color = "error";
-                if (position[axe].homed) {
-                    homed = " (H)";
-                    color = "success";
-                    axesHomed++;
-                }
-                if (axe == "x") {
-                    document.getElementById("x-axe").innerHTML = position[axe].pos + homed;
-                    document.getElementById("x-axe").className = color;
-                } else if (axe == "y") {
-                    document.getElementById("y-axe").innerHTML = position[axe].pos + homed;
-                    document.getElementById("y-axe").className = color;
-                } else {
-                    document.getElementById("z-axe").innerHTML = position[axe].pos + homed;
-                    document.getElementById("z-axe").className = color;
-                }
+        for (const axe in position) {
+            let homed = "";
+            let color = "error";
+            if (position[axe].homed) {
+                homed = " (H)";
+                color = "success";
+                axesHomed++;
             }
-        } else {
-            console.log("render custom table for axes");
+
+            document.getElementsByClassName(axe + "-axe")[0].style.display = "flex";
+            document.getElementById(axe + "-axe").innerHTML = position[axe].pos + homed;
+            document.getElementById(axe + "-axe").className = color;
+
         }
 
         if (totalAxes === axesHomed) {
@@ -318,7 +332,6 @@ class Machinekit {
                     </tr>`;
             });
         }
-
     }
 
     errorHandler(error) {
@@ -352,7 +365,6 @@ class Machinekit {
         this.displayedErrors.map((value, index) => {
             errorElement.innerHTML += `<p class="error" id="error_executing">${value}<button class="error" id="error-${index}" onclick="machinekit.deleteError(${index})">x</button></p>`;
         });
-
     }
 
     deleteError(index) {
@@ -372,15 +384,6 @@ class Machinekit {
         }
     }
 
-    controlInterval() {
-        if (document.readyState != "loading") {
-            if (this.page == "controller") {
-                this.getMachineVitals();
-            }
-        }
-
-        setTimeout(this.controlInterval.bind(this), this.interval)
-    }
 
     async clickHandler(url, command) {
         let result;
