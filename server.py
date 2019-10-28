@@ -113,7 +113,7 @@ def update_file_queue():
             raise NameError(errorMessages['6'])
 
     settings.file_queue = new_queue
-    return {"success": "Queue updated"}
+    return {"success": settings.file_queue}
 
 
 @app.route("/machinekit/halcmd", endpoint='halcmd', methods=["POST"])

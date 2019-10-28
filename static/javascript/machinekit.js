@@ -94,6 +94,15 @@ class Machinekit {
         //On first connect there is nothing to compare
         if (this.firstConnect) {
             this.firstConnect = false;
+            if (this.file_queue.length > 0) {
+                this.request.post("/machinekit/open_file", {
+                    "name": this.file_queue[0]
+                });
+            } else {
+                this.request.post("/machinekit/open_file", {
+                    "name": ""
+                });
+            }
         } else {
             //Compare if state of axes is same. If not machine is moving so we want faster data
             const oldState = JSON.stringify(this.state.position);
@@ -110,46 +119,32 @@ class Machinekit {
                 Check if in the previous state the machine was running a program vs if it is done now.
                 If it is done now remove 1 item from the queue and open the next item in the queue
             */
-            if (this.state.program.rcs_state === "RCS_EXEC" && result.program.rcs_state === "RCS_DONE") {
-                //Remove last item from the queue
-                this.file_queue.splice(0, 1);
-                //Update the queue on the server
-                this.request.post("/server/update_file_queue", {
-                    "new_queue": this.file_queue
-                });
-                this.renderFileQueue();
-                //Select the first item
-                let file = this.file_queue[0];
-                if (!file) {
-                    file = "";
-                }
-                //Open the first item on the machine
-                this.request.post("/machinekit/open_file", {
-                    "name": file
-                });
-            }
-            //If the queue is empty clear the machine
-            if (this.file_queue.length > 0) {
-                if (this.firstConnect) {
-                    this.request.post("/machinekit/open_file", {
-                        "name": this.file_queue[0]
+            if (this.state.program.rcs_state != result.program.rcs_state) {
+                if (result.program.rcs_state === "RCS_DONE") {
+                    //Remove last item from the queue
+                    this.file_queue.splice(0, 1);
+                    //Update the queue on the server
+                    this.request.post("/server/update_file_queue", {
+                        "new_queue": this.file_queue
                     });
-                } else {
-                    if (this.state.program.file == "") {
-                        this.request.post("/machinekit/open_file", {
-                            "name": this.file_queue[0]
-                        });
+                    //Select the first item
+                    let file = this.file_queue[0];
+                    if (!file) {
+                        file = "";
                     }
+                    //Open the first item on the machine
+                    this.request.post("/machinekit/open_file", {
+                        "name": file
+                    });
                 }
-
-            } else {
+            }
+            if (!this.state.program.file) {
                 this.request.post("/machinekit/open_file", {
-                    "name": ""
+                    "name": this.file_queue[0]
                 });
             }
+
         }
-
-
 
         const wholeState = JSON.stringify(this.state);
         const wholeNewState = JSON.stringify(result);
