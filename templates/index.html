@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>CNC Controller</title>
-    <script src="/static/javascript/machinekit.js"></script>
+    <!-- <script src="/static/javascript/request.js"></script> -->
     <link href="//css.underdark.nl/0.2/base.css" rel="stylesheet" />
     <link href="//css.underdark.nl/0.2/layout.css" rel="stylesheet" />
     <link href="//css.underdark.nl/0.2/module.css" rel="stylesheet" />
@@ -14,6 +14,11 @@
     <link rel="stylesheet" href="/static/css/visibility.css">
     <link rel="stylesheet" href="/static/css/index.css">
     <script src="/static/javascript/sortable.js"></script>
+    <script type="module">
+        import { Machinekit } from "/static/javascript/machinekit.js"
+        window.machinekit = new Machinekit();
+    </script>
+
 </head>
 
 <body>

@@ -25,7 +25,7 @@ API_KEY: {{token}}
 Content-Type: application/json
 
 {
-    "command": 1.15
+    "command": 1.1523
 }
 
 ###
