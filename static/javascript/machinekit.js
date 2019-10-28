@@ -88,6 +88,7 @@ class Machinekit {
         if (!isSameState) {
             this.buildControllerPage();
         }
+
     }
 
     controlintervalSpeedAndCompareStates(result) {

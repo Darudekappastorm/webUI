@@ -14,7 +14,8 @@ with open("./jsonFiles/errorMessages.json") as f:
 @errors
 def set_home_axes():
     if not "command" in request.json:
-        raise ValueError(errorMessages['2'])
+        raise ValueError(
+            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
 
     data = request.json
     command = escape(data['command'])
@@ -26,10 +27,12 @@ def set_home_axes():
 @errors
 def send_command():
     if not "command" in request.json:
-        raise ValueError(errorMessages['2'])
+        raise ValueError(
+            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
 
     if len(request.json["command"]) == 0:
-        raise ValueError(errorMessages['3'])
+        raise ValueError(
+            errorMessages['3']['message'], errorMessages['3']['status'], errorMessages['3']['type'])
 
     data = request.json
     command = escape(data["command"])
@@ -41,7 +44,8 @@ def send_command():
 @errors
 def manual():
     if not "axes" in request.json or not "speed" in request.json or not "increment" in request.json:
-        raise ValueError(errorMessages['2'])
+        raise ValueError(
+            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
 
     data = request.json
     axes = escape(data['axes'])

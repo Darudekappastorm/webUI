@@ -15,7 +15,8 @@ with open("./jsonFiles/errorMessages.json") as f:
 @errors
 def set_machinekit_spindle_speed():
     if not "command" in request.json:
-        raise ValueError(errorMessages['2'])
+        raise ValueError(
+            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
 
     data = request.json
     command = escape(data["command"])
@@ -27,7 +28,8 @@ def set_machinekit_spindle_speed():
 @errors
 def set_machinekit_spindle_brake():
     if not "command" in request.json:
-        raise ValueError(errorMessages['2'])
+        raise ValueError(
+            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
 
     data = request.json
     command = escape(data["command"])
@@ -39,7 +41,8 @@ def set_machinekit_spindle_brake():
 @errors
 def set_machinekit_spindle_direction():
     if not "command" in request.json:
-        raise ValueError(errorMessages['2'])
+        raise ValueError(
+            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
 
     data = request.json
     command = escape(data['command'])
@@ -51,7 +54,8 @@ def set_machinekit_spindle_direction():
 @errors
 def set_spindle_enabled():
     if not "command" in request.json:
-        raise ValueError(errorMessages['2'])
+        raise ValueError(
+            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
 
     data = request.json
     command = escape(data["command"])
@@ -63,7 +67,8 @@ def set_spindle_enabled():
 @errors
 def set_machinekit_spindle_override():
     if not "command" in request.json:
-        raise ValueError(errorMessages['2'])
+        raise ValueError(
+            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
 
     data = request.json
     command = escape(data["command"])

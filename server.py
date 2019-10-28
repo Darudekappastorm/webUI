@@ -101,16 +101,19 @@ def return_files():
 @errors
 def update_file_queue():
     if not "new_queue" in request.json:
-        raise ValueError(errorMessages['2'])
+        raise ValueError(
+            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
     if not type(settings.file_queue) == list:
-        raise ValueError(errorMessages['5'])
+        raise ValueError(
+            errorMessages['5']['message'], errorMessages['5']['status'], errorMessages['5']['type'])
 
     data = request.json
     new_queue = data["new_queue"]
 
     for item in new_queue:
         if not os.path.isfile(config['storage']['upload_folder'] + "/" + escape(item)):
-            raise NameError(errorMessages['6'])
+            raise NameError(
+                errorMessages['6']['message'], errorMessages['6']['status'], errorMessages['6']['type'])
 
     settings.file_queue = new_queue
     return {"success": settings.file_queue}
@@ -121,7 +124,8 @@ def update_file_queue():
 @errors
 def halcmd():
     if not "halcmd" in request.json:
-        raise ValueError(errorMessages['2'])
+        raise ValueError(
+            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
     command = request.json["halcmd"]
     i_command = command.split(' ', 1)[0]
 
@@ -131,7 +135,8 @@ def halcmd():
             isInList = True
             break
     if not isInList:
-        raise ValueError(errorMessages['8'])
+        raise ValueError(
+            errorMessages['8']['message'], errorMessages['8']['status'], errorMessages['8']['type'])
 
     os.system('halcmd ' + command + " > output.txt")
     f = open("output.txt", "r")
@@ -143,7 +148,8 @@ def halcmd():
 @errors
 def open_file():
     if not "name" in request.json:
-        raise ValueError(errorMessages['2'])
+        raise ValueError(
+            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
 
     data = request.json
     name = escape(data["name"])
@@ -155,7 +161,8 @@ def open_file():
 def upload():
     try:
         if "file" not in request.files:
-            raise ValueError(errorMessages['5'])
+            raise ValueError(
+                errorMessages['5']['message'], errorMessages['5']['status'], errorMessages['5']['type'])
 
         file = request.files["file"]
         filename = secure_filename(file.filename)
@@ -169,7 +176,8 @@ def upload():
         result = cur.fetchall()
 
         if len(result) > 0:
-            raise ValueError(errorMessages['7'])
+            raise ValueError(
+                errorMessages['7']['message'], errorMessages['7']['status'], errorMessages['7']['type'])
 
         cur.execute("""
             INSERT INTO files (file_name, file_location)
@@ -181,7 +189,8 @@ def upload():
                                ['upload_folder'] + "/" + filename))
         return {"success": "file added"}
     except ValueError as e:
-        return {"errors": {"message": e[0]['message'], "type": e[0]["type"], "status": e[0]["status"]}}, e[0]["status"]
+        message, status, errType = e
+        return {"errors": {"message": message, "status": status, "type": errType}}, status
     except Exception as e:
         logger.critical(e)
         return {"errors": errorMessages['9']}, 500

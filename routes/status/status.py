@@ -34,7 +34,8 @@ def get_machinekit_position():
 @errors
 def set_machinekit_status():
     if not "command" in request.json:
-        raise ValueError(errorMessages['2'])
+        raise ValueError(
+            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
 
     data = request.json
     command = escape(data['command'])
@@ -46,7 +47,8 @@ def set_machinekit_status():
 @errors
 def set_machinekit_feedrate():
     if not "command" in request.json:
-        raise ValueError(errorMessages['2'])
+        raise ValueError(
+            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
 
     data = request.json
     command = float(escape(data["command"]))
@@ -58,7 +60,8 @@ def set_machinekit_feedrate():
 @errors
 def maxvel():
     if not "command" in request.json:
-        raise ValueError(errorMessages['2'])
+        raise ValueError(
+            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
 
     data = request.json
     command = escape(data["command"])
