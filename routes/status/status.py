@@ -4,8 +4,11 @@ import json
 import settings
 from decorators.auth import auth
 from decorators.errors import errors
+from decorators.validate import validate
 from flask import Blueprint, request, escape
 import configparser
+from marshmallow import Schema
+from schemas.schemas import StatusSchema, SpindleOverrideSchema
 
 config = configparser.ConfigParser()
 config.read("default.ini")
@@ -32,11 +35,9 @@ def get_machinekit_position():
 @status.route("/machinekit/status", endpoint='set_machinekit_status', methods=["POST"])
 @auth
 @errors
+@validate(StatusSchema)
 def set_machinekit_status():
-    if not "command" in request.json:
-        raise ValueError(errorMessages['2'])
-
-    data = request.json
+    data = request.sanitizedRequest
     command = escape(data['command'])
     return settings.controller.machine_status(command)
 
@@ -44,25 +45,19 @@ def set_machinekit_status():
 @status.route("/machinekit/feed", endpoint='set_machinekit_feedrate', methods=["POST"])
 @auth
 @errors
+@validate(SpindleOverrideSchema)
 def set_machinekit_feedrate():
-    if not "command" in request.json:
-        raise ValueError(errorMessages['2'])
-
-    data = request.json
-    command = float(escape(data["command"]))
-    return settings.controller.feedoverride(command)
+    data = request.sanitizedRequest
+    return settings.controller.feedoverride(data["command"])
 
 
 @status.route("/machinekit/maxvel", endpoint='maxvel', methods=["POST"])
 @auth
 @errors
+@validate(SpindleOverrideSchema)
 def maxvel():
-    if not "command" in request.json:
-        raise ValueError(errorMessages['2'])
-
-    data = request.json
-    command = escape(data["command"])
-    return settings.controller.maxvel(float(command))
+    data = request.sanitizedRequest
+    return settings.controller.maxvel(data["command"])
 
 
 @status.route("/machinekit/toolchange", endpoint='tool_changer', methods=["GET"])

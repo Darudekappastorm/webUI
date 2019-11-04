@@ -7,9 +7,12 @@ import configparser
 from flask_cors import CORS
 from flask_mysqldb import MySQL
 from decorators.auth import auth
+from decorators.validate import validate
 from werkzeug.utils import secure_filename
 from flask import Flask, request, redirect, abort, escape, render_template, jsonify
 from decorators.errors import errors
+from marshmallow import Schema
+from schemas.schemas import UpdateQueueSchema, OpenFileSchema
 
 from routes.axes.axes import axes
 from routes.status.status import status
@@ -99,21 +102,18 @@ def return_files():
 @app.route("/server/update_file_queue", endpoint='update_file_queue', methods=["POST"])
 @auth
 @errors
+@validate(UpdateQueueSchema)
 def update_file_queue():
-    if not "new_queue" in request.json:
-        raise ValueError(errorMessages['2'])
-    if not type(settings.file_queue) == list:
-        raise ValueError(errorMessages['5'])
-
-    data = request.json
+    data = request.sanitizedRequest
     new_queue = data["new_queue"]
 
     for item in new_queue:
-        if not os.path.isfile(settings.UPLOAD_FOLDER + "/" + escape(item)):
-            raise NameError(errorMessages['6'])
+        if not os.path.isfile(config['storage']['upload_folder'] + "/" + escape(item)):
+            raise NameError(
+                errorMessages['6']['message'], errorMessages['6']['status'], errorMessages['6']['type'])
 
     settings.file_queue = new_queue
-    return {"success": "Queue updated"}
+    return {"success": settings.file_queue}
 
 
 @app.route("/machinekit/halcmd", endpoint='halcmd', methods=["POST"])
@@ -121,7 +121,8 @@ def update_file_queue():
 @errors
 def halcmd():
     if not "halcmd" in request.json:
-        raise ValueError(errorMessages['2'])
+        raise ValueError(
+            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
     command = request.json["halcmd"]
     i_command = command.split(' ', 1)[0]
 
@@ -131,7 +132,8 @@ def halcmd():
             isInList = True
             break
     if not isInList:
-        raise ValueError(errorMessages['8'])
+        raise ValueError(
+            errorMessages['8']['message'], errorMessages['8']['status'], errorMessages['8']['type'])
 
     os.system('halcmd ' + command + " > output.txt")
     f = open("output.txt", "r")
@@ -141,13 +143,10 @@ def halcmd():
 @app.route("/machinekit/open_file", endpoint='open_file', methods=["POST"])
 @auth
 @errors
+@validate(OpenFileSchema)
 def open_file():
-    if not "name" in request.json:
-        raise ValueError(errorMessages['2'])
-
-    data = request.json
-    name = escape(data["name"])
-    return controller.open_file(os.path.join(settings.UPLOAD_FOLDER + "/" + name))
+    data = request.sanitizedRequest
+    return settings.controller.open_file(config['storage']['upload_folder'], escape(data["name"]))
 
 
 @app.route("/server/file_upload", endpoint='upload', methods=["POST"])
@@ -155,7 +154,8 @@ def open_file():
 def upload():
     try:
         if "file" not in request.files:
-            raise ValueError(errorMessages['5'])
+            raise ValueError(
+                errorMessages['5']['message'], errorMessages['5']['status'], errorMessages['5']['type'])
 
         file = request.files["file"]
         filename = secure_filename(file.filename)
@@ -169,24 +169,27 @@ def upload():
         result = cur.fetchall()
 
         if len(result) > 0:
-            raise ValueError(errorMessages['7'])
+            raise ValueError(
+                errorMessages['7']['message'], errorMessages['7']['status'], errorMessages['7']['type'])
 
         cur.execute("""
             INSERT INTO files (file_name, file_location)
             VALUES (%s, %s)
-            """, (filename, settings.UPLOAD_FOLDER)
+            """, (filename, config['storage']['upload_folder'])
         )
         mysql.connection.commit()
-        file.save(os.path.join(settings.UPLOAD_FOLDER + "/" + filename))
+        file.save(os.path.join(config['storage']
+                               ['upload_folder'] + "/" + filename))
         return {"success": "file added"}
     except ValueError as e:
-        print(e[0]['message'])
-        return {"errors": {"message": e[0]['message'], "type": e[0]["type"], "status": e[0]["status"]}}, e[0]["status"]
+        message, status, errType = e
+        return {"errors": {"message": message, "status": status, "type": errType}}, status
     except Exception as e:
         logger.critical(e)
         return {"errors": errorMessages['9']}, 500
 
 
 if __name__ == "__main__":
-    app.run('0.0.0.0', debug=True,
-            port=5000)
+    app.run('0.0.0.0',
+            debug=(True if config['server'].get('debug', False) else False),
+            port=config['server']['port'])

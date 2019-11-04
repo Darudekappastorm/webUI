@@ -1,133 +1,3 @@
-/*Error messages*/
-#no-critical-errors,
-#machinekit-down,
-#no-file-selected,
-#invalid-api-key {
-    display: none
-}
-
-/*Status-tbody*/
-#estop-disabled,
-#estop-enabled,
-#power-on,
-#power-off,
-#interp-idle,
-#interp-paused,
-#interp-waiting,
-#interp-reading,
-#task-mdi,
-#task-auto,
-#task-manual,
-#spindle-speed,
-#rcs-done,
-#rcs-error,
-#rcs-exec {
-    display: none;
-}
-
-/*Sections*/
-#section-vitals,
-#controls,
-#xy-control,
-#z-control,
-#file-manager {
-    display: none;
-}
-
-/*Controls*/
-#machine-power,
-#machine-estop,
-#machine-power-manual,
-#machine-estop-manual,
-#machine-home-axes,
-#program-control,
-#program-control button,
-#spindle-control,
-#spindle-control button,
-#spindle-speed-control,
-#feed-override-control,
-#spindle-override-control,
-#max-velocity-control,
-#mdi-command {
-    display: none
-}
-
-body.not-authorized #invalid-api-key,
-body.machinekit-down #machinekit-down,
-body.no-critical-errors.no-file-selected #no-file-selected {
-    display: block;
-}
-
-body.no-critical-errors #no-critical-errors,
-body.controller.no-critical-errors #section-vitals,
-body.controller.no-critical-errors #controls,
-body.filemanager.no-critical-errors #file-manager {
-    display: block;
-}
-
-body.controller.no-critical-errors.estop-enabled #estop-enabled,
-body.controller.no-critical-errors.estop-disabled #estop-disabled,
-body.controller.no-critical-errors.power-on #power-on,
-body.controller.no-critical-errors.power-off #power-off {
-    display: block;
-}
-
-body.controller.no-critical-errors.interp-idle #interp-idle,
-body.controller.no-critical-errors.interp-paused #interp-paused,
-body.controller.no-critical-errors.interp-waiting #interp-waiting,
-body.controller.no-critical-errors.interp-reading #interp-reading,
-body.controller.no-critical-errors.mode-auto #task-auto,
-body.controller.no-critical-errors.mode-mdi #task-mdi,
-body.controller.no-critical-errors.mode-manual #task-manual,
-body.controller.no-critical-errors #spindle-speed,
-body.controller.no-critical-errors.rcs-done #rcs-done,
-body.controller.no-critical-errors.rcs-exec #rcs-exec,
-body.controller.no-critical-errors.rcs-error #rcs-error {
-    display: block;
-}
-
-body.controller.no-critical-errors #machine-estop,
-body.controller.no-critical-errors #machine-estop-manual,
-body.controller.no-critical-errors.estop-disabled #machine-power,
-body.controller.no-critical-errors.estop-disabled #machine-power-manual,
-body.controller.no-critical-errors.estop-disabled.power-on.interp-idle #machine-home-axes,
-body.controller.no-critical-errors.estop-disabled.power-on.homed.file-selected #program-control,
-body.controller.no-critical-errors.estop-disabled.power-on #spindle-control,
-body.controller.no-critical-errors.estop-disabled.power-on.spindle-brake-disengaged.spindle-enabled #spindle-speed-control,
-body.controller.no-critical-errors.estop-disabled.power-on #max-velocity-control,
-body.controller.no-critical-errors.estop-disabled.power-on #feed-override-control,
-body.controller.no-critical-errors.estop-disabled.power-on #spindle-override-control,
-body.controller.no-critical-errors.estop-disabled.power-on.homed.interp-idle #mdi-command {
-    display: flex;
-}
-
-body.controller.no-critical-errors.estop-disabled.power-on.homed.file-selected.interp-idle #program-start,
-body.controller.no-critical-errors.estop-disabled.power-on.homed.file-selected.interp-paused #program-resume,
-body.controller.no-critical-errors.estop-disabled.power-on.homed.file-selected.interp-paused #program-stop,
-body.controller.no-critical-errors.estop-disabled.power-on.homed.file-selected.interp-waiting #program-stop,
-body.controller.no-critical-errors.estop-disabled.power-on.homed.file-selected.interp-reading #program-stop,
-body.controller.no-critical-errors.estop-disabled.power-on.homed.file-selected.interp-reading #program-pause,
-body.controller.no-critical-errors.estop-disabled.power-on.homed.file-selected.interp-waiting #program-pause,
-body.controller.no-critical-errors.estop-disabled.power-on.spindle-brake-engaged #reverse,
-body.controller.no-critical-errors.estop-disabled.power-on.spindle-brake-engaged #forward,
-body.controller.no-critical-errors.estop-disabled.power-on.spindle-forward #reverse,
-body.controller.no-critical-errors.estop-disabled.power-on.spindle-reverse #forward,
-body.controller.no-critical-errors.estop-disabled.power-on.spindle-forward #brake,
-body.controller.no-critical-errors.estop-disabled.power-on.spindle-reverse #brake,
-body.controller.no-critical-errors.estop-disabled.power-on.spindle-forward #off,
-body.controller.no-critical-errors.estop-disabled.power-on.spindle-reverse #off {
-    display: block;
-}
-
-body.controller.no-critical-errors.estop-disabled.power-on #xy-control,
-body.controller.no-critical-errors.estop-disabled.power-on #z-control {
-    margin-top: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: unset;
-    -webkit-align-items: unset;
-}
-
 #center-controls {
     display: flex;
     justify-content: center;
@@ -194,7 +64,7 @@ body.controller.no-critical-errors.estop-disabled.power-on #z-control {
 
 .content {
     background: rgba(0, 0, 0, .05);
-    border: 1px solid rgba(0, 0, 0, .05)
+    border: 1px solid rgba(0, 0, 0, .05);
 }
 
 .content p {
@@ -202,6 +72,10 @@ body.controller.no-critical-errors.estop-disabled.power-on #z-control {
     margin: 5px;
 }
 
+.column-axes p,
+.column p {
+    min-height: 20px;
+}
 
 @media only screen and (min-width: 801px) and (max-width: 1000px) {
 
@@ -253,10 +127,29 @@ body.controller.no-critical-errors.estop-disabled.power-on #z-control {
         flex-basis: calc(50% - 4px);
     }
 
+    .content label {
+        min-height: 50px;
+    }
 }
 
 @media only screen and (max-width: 600px) {
     .optional {
         display: none;
     }
+
+    .content label {
+        min-height: 50px;
+    }
+}
+
+.x-axe,
+.y-axe,
+.z-axe,
+.a-axe,
+.b-axe,
+.c-axe,
+.u-axe,
+.v-axe,
+.w-axe {
+    display: none;
 }

@@ -3,6 +3,7 @@ import json
 import configparser
 import settings
 import werkzeug
+from marshmallow import ValidationError
 
 config = configparser.ConfigParser()
 config.read("default.ini")
@@ -14,58 +15,30 @@ def errors(f):
     def errorWrapper(*args, **kwargs):
         try:
             if request.method == "POST":
-                print(request.json)
                 if not request.json:
-                    raise ValueError(errorMessages['4'])
+                    raise ValueError(
+                        errorMessages['4']['message'], errorMessages['4']['status'], errorMessages['4']['type'])
             if settings.machinekit_running == False:
-                return {"errors": errorMessages['0']}, 500
+                raise RuntimeError(
+                    errorMessages['0']['message'], errorMessages['0']['status'], errorMessages['0']['type'])
             return f(*args, **kwargs)
 
+        except ValidationError as err:
+            return {"errors": {"keys": err.messages, "status": 400, "type": "ValidationError"}}, 400
         except ValueError as e:
-
-            if type(e.message) == str:
-                return {"errors": {"message": e.message, "status": 400, "type": "ValueError"}}, 400
-            else:
-                return {"errors": e.message}, e.message['status']
+            message, status, errType = e
+            return {"errors": {"message": message, "status": status, "type": errType}}, status
         except RuntimeError as e:
-            return {"errors": e.message}, e.message['status']
-        except KeyError as e:
-            return {"errors": {"message": "Unknown key expected: " + e.message, "status": 400, "type": "KeyError"}}, 400
+            message, status, errType = e
+            return {"errors": {"message": message, "status": status, "type": errType}}, status
         except NameError as e:
-            return {"errors": e.message}, e.message['status']
+            message, status, errType = e
+            return {"errors": {"message": message, "status": status, "type": errType}}, status
         except (werkzeug.exceptions.BadRequest) as e:
-            return {"errors": errorMessages['10']}
+            message, status, errType = errorMessages['10']
+            return {"errors": {"message": errorMessages['10']['message'], "status": errorMessages['10']['status'], "type": errorMessages['10']['type']}}, errorMessages['10']['status']
         except Exception as e:
-            return {"errors": {"message": e.message}}
+            return {"errors": {"message": e.message}}, 500
 
     errorWrapper.__name__ = f.__name__
     return errorWrapper
-
-
-# def errors(optional_parameter=""):
-#     def realDecorator(f):
-#         def errorWrapper(*args, **kwargs):
-#             """ """
-#             try:
-#                 if request.method == "POST":
-#                     if not request.json:
-#                         raise Exception(errorMessages['4'])
-
-#                 if config["storage"]["machinekit_running"] == False:
-#                     return {"errors": errorMessages['0']}, 500
-#                 return f(*args, **kwargs)
-#             except ValueError as e:
-#                 if type(e.message) == str:
-#                     return {"errors": {"message": e.message, "status": 400, "type": "ValueError"}}, 400
-#                 else:
-#                     return {"errors": e.message}, 400
-#             except RuntimeError as e:
-#                 return {"errors": e.message}, 400
-#             except KeyError as e:
-#                 return {"errors": {"message": "Unknown key expected: " + e.message, "status": 400, "type": "KeyError"}}, 400
-#             except NameError as e:
-#                 return {"errors": e.message}, 404
-#             except Exception as e:
-#                 return {"errors": {"message": e.message}}
-#         return errorWrapper
-#     return realDecorator

@@ -3,3 +3,5 @@ __pycache__
 .vscode
 logfile.log
 *.pyc
+*.nc
+*.gcode

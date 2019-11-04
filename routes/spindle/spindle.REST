@@ -18,7 +18,7 @@ API_KEY: {{token}}
 Content-Type: application/json
 
 {
-    "command": "spindle_on"
+    "command": "spindle_off"
 }
 
 ###
@@ -36,7 +36,7 @@ API_KEY: {{token}}
 Content-Type: application/json
 
 {
-    "command": 1
+    "command": 0
 }
 
 ###

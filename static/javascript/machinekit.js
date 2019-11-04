@@ -1,72 +1,41 @@
+import {
+    Request
+} from "./request.js";
+
+
 window.onload = async () => {
-    const sortable = new Sortable.default(document.getElementById('tbody_queue'), {
+    new Sortable.default(document.getElementById('tbody_queue'), {
         draggable: 'tr'
     });
-
-}
-class Request {
-    api = "http://192.168.1.116:5000";
-    api_key = "test_secret";
-
-    get(url) {
-        return fetch(this.api + url, {
-                method: "GET",
-                headers: {
-                    "API_KEY": this.api_key
-                }
-            })
-            .then((response) => response.json())
-            .then((data) => data)
-            .catch((err) => console.log(err));
-    }
-    post(url, data) {
-        return fetch(this.api + url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "API_KEY": this.api_key,
-                },
-                mode: "cors",
-                body: JSON.stringify(data)
-            })
-            .then((response) => response.json())
-            .then((data) => data)
-            .catch((err) => console.log(err));
-    }
-    upload(url, data) {
-        return fetch(this.api + url, {
-                method: "POST",
-                headers: {
-                    "API_KEY": this.api_key,
-                },
-                mode: "cors",
-                body: data
-            })
-            .then((response) => response.json())
-            .then((data) => data)
-            .catch((err) => console.log(err));
-    }
 }
 
-class Machinekit {
+export class Machinekit {
     state = {}
     displayedErrors = [];
     page = "controller";
-    saveState = 1;
 
     slowInterval = 2000
     fastInterval = 200;
-    interval = 2000;
-    isIntervalRunning = false;
+    interval = 100;
 
     file_queue = [];
     local_file_queue = [];
     files_on_server = [];
+    firstConnect = true;
 
     constructor() {
         this.request = new Request();
+        this.getFilesFromServer();
         this.controlInterval();
-        this.page = localStorage.getItem("page");
+    }
+
+    controlInterval() {
+        if (document.readyState != "loading") {
+            if (this.page == "controller") {
+                this.getMachineVitals();
+            }
+        }
+        setTimeout(this.controlInterval.bind(this), this.interval)
     }
 
     async getMachineVitals() {
@@ -74,9 +43,74 @@ class Machinekit {
         if ("errors" in result) {
             return this.errorHandler(result.errors);
         }
+        const isSameState = this.controlintervalSpeedAndCompareStates(result);
         this.state = result;
 
-        this.buildControllerPage();
+        //Only update the page classes if the states are not exactly the same
+        if (!isSameState) {
+            this.buildControllerPage();
+        }
+    }
+
+    controlintervalSpeedAndCompareStates(result) {
+        //On first connect there is nothing to compare
+        if (this.firstConnect) {
+            if (this.file_queue.length > 0) {
+                this.request.post("/machinekit/open_file", {
+                    "name": this.file_queue[0]
+                });
+            } else {
+                this.request.post("/machinekit/open_file", {
+                    "name": ""
+                });
+            }
+            this.firstConnect = false;
+        } else {
+            //Compare if state of axes is same. If not machine is moving so we want faster data
+            const oldState = JSON.stringify(this.state.position);
+            const newState = JSON.stringify(result.position);
+
+            if (oldState === newState) {
+                if (this.interval != this.slowInterval) {
+                    this.interval = this.slowInterval
+                }
+            } else {
+                this.interval = this.fastInterval;
+            }
+            /*
+                Check if in the previous state the machine was running a program vs if it is done now.
+                If it is done now remove 1 item from the queue and open the next item in the queue
+            */
+            if (this.state.program.rcs_state != result.program.rcs_state) {
+                if (result.program.rcs_state === "RCS_DONE") {
+                    //Remove last item from the queue
+                    this.file_queue.splice(0, 1);
+                    //Update the queue on the server
+                    this.request.post("/server/update_file_queue", {
+                        "new_queue": this.file_queue
+                    });
+                    //Select the first item
+                    let file = this.file_queue[0];
+                    if (!file) {
+                        file = "";
+                    }
+                    //Open the first item on the machine
+                    this.request.post("/machinekit/open_file", {
+                        "name": file
+                    });
+                }
+            }
+
+            if (!this.state.program.file && this.file_queue.length > 0) {
+                this.request.post("/machinekit/open_file", {
+                    "name": this.file_queue[0]
+                });
+            }
+        }
+
+        const wholeState = JSON.stringify(this.state);
+        const wholeNewState = JSON.stringify(result);
+        return (wholeState === wholeNewState);
     }
 
     buildControllerPage() {
@@ -90,7 +124,8 @@ class Machinekit {
                 interp_state,
                 task_mode,
                 feedrate,
-                rcs_state
+                rcs_state,
+                tool_change
             },
             spindle: {
                 spindle_speed,
@@ -106,11 +141,18 @@ class Machinekit {
         } = this.state;
         document.body.className = "controller no-critical-errors";
 
+        if (tool_change === 0) {
+            document.getElementById("modaltoggle-warning").checked = true;
+            document.body.classList.add("tool-change");
+        } else {
+            document.getElementById("modaltoggle-warning").checked = false;
+        }
+
         if (file) {
             document.getElementById("current-file").innerHTML = file;
             document.body.classList.add("file-selected");
-
         } else {
+            document.getElementById("current-file").innerHTML = "";
             document.body.classList.add("no-file-selected");
         }
 
@@ -126,71 +168,28 @@ class Machinekit {
             document.body.classList.add("estop-disabled");
         }
 
-        switch (interp_state) {
-            case "INTERP_IDLE":
-                document.body.classList.add("interp-idle");
-                break;
-            case "INTERP_PAUSED":
-                document.body.classList.add("interp-paused");
-                break;
-            case "INTERP_WAITING":
-                document.body.classList.add("interp-waiting");
-                break;
-            case "INTERP_READING":
-                document.body.classList.add("interp-reading");
-                break;
-        }
+        document.body.classList.add(interp_state.toLowerCase().replace("_", "-"));
+        document.body.classList.add(task_mode.toLowerCase().replace("_", "-"));
+        document.body.classList.add(rcs_state.toLowerCase().replace("_", "-"));
 
-        switch (task_mode) {
-            case "MODE_MDI":
-                document.body.classList.add("mode-mdi");
-                break;
-            case "MODE_MANUAL":
-                document.body.classList.add("mode-manual");
-                break;
-            case "MODE_AUTO":
-                document.body.classList.add("mode-auto");
-                break;
-        }
-
-        switch (rcs_state) {
-            case "RCS_DONE":
-                document.body.classList.add("rcs-done");
-                break;
-            case "RCS_EXEC":
-                document.body.classList.add("rcs-exec");
-                break;
-            case "RCS_ERROR":
-                document.body.classList.add("rcs-error");
-                break;
-        }
 
         document.getElementById("spindle-speed").innerHTML = spindle_speed;
         let axesHomed = 0;
         const totalAxes = Object.keys(position).length;
 
-        if (totalAxes === 3) {
-            for (const axe in position) {
-                let homed = "";
-                let color = "error";
-                if (position[axe].homed) {
-                    homed = " (H)";
-                    color = "success";
-                    axesHomed++;
-                }
-                if (axe == "x") {
-                    document.getElementById("x-axe").innerHTML = position[axe].pos + homed;
-                    document.getElementById("x-axe").className = color;
-                } else if (axe == "y") {
-                    document.getElementById("y-axe").innerHTML = position[axe].pos + homed;
-                    document.getElementById("y-axe").className = color;
-                } else {
-                    document.getElementById("z-axe").innerHTML = position[axe].pos + homed;
-                    document.getElementById("z-axe").className = color;
-                }
+        for (const axe in position) {
+            let homed = "";
+            let color = "error";
+            if (position[axe].homed) {
+                homed = " (H)";
+                color = "success";
+                axesHomed++;
             }
-        } else {
-            console.log("render custom table for axes");
+
+            document.getElementsByClassName(axe + "-axe")[0].style.display = "flex";
+            document.getElementById(axe + "-axe").innerHTML = position[axe].pos + homed;
+            document.getElementById(axe + "-axe").className = color;
+
         }
 
         if (totalAxes === axesHomed) {
@@ -228,8 +227,7 @@ class Machinekit {
         document.getElementById("max-velocity-output").innerHTML = Math.round((velocity * 60));
     }
 
-    async fileManager() {
-        document.body.className = "filemanager no-critical-errors";
+    async getFilesFromServer() {
         const result = await this.request.get("/server/files");
         if ("errors" in result) {
             return this.errorHandler(result.errors);
@@ -237,6 +235,11 @@ class Machinekit {
 
         this.file_queue = result.file_queue;
         this.files_on_server = result.result;
+    }
+
+    async fileManager() {
+        document.body.className = "filemanager no-critical-errors";
+        await this.getFilesFromServer();
         this.buildFileManagerPage();
     }
 
@@ -268,7 +271,6 @@ class Machinekit {
                     </tr>`;
             });
         }
-
     }
 
     errorHandler(error) {
@@ -280,8 +282,13 @@ class Machinekit {
             document.body.className = "machinekit-down"
             return;
         }
+
+        if (error.message == "Failed to fetch") {
+            this.interval = 50000;
+            document.body.className = "server-down";
+            return;
+        }
         if (error.status == 403) {
-            console.log("slowing interval. User not authorized");
             this.interval = 50000;
             document.body.className = "not-authorized"
             return;
@@ -305,39 +312,18 @@ class Machinekit {
     }
 
     navigation(page) {
-        localStorage.setItem("page", page);
-        this.page = page;
-
         if (page == "controller") {
+            this.state.page = "controller";
+            this.page = "controller";
             this.getMachineVitals();
         } else {
+            this.state.page = "filemanager";
+            this.page = "filemanager";
             this.fileManager();
         }
     }
 
-    controlInterval() {
-        if (!this.isIntervalRunning) {
-            this.isIntervalRunning = true;
-        }
-        if (this.page == "controller") {
-            this.getMachineVitals();
-            if (this.saveState == 1) {
-                if (this.oldState !== JSON.stringify(this.state.position) && this.oldState != undefined) {
-                    this.interval = this.fastInterval;
-                } else {
-                    if (this.interval != this.slowInterval) {
-                        this.interval = this.slowInterval
-                    }
-                }
-                this.oldState = JSON.stringify(this.state.position);
-                this.saveState = 0;
-            }
-            this.saveState++;
-        }
-        setTimeout(this.controlInterval.bind(this), this.interval)
-    }
 
-    /*ALL BUTTON CLICK HANDLERS*/
     async clickHandler(url, command) {
         let result;
         if (command == "MDI") {
@@ -498,5 +484,12 @@ class Machinekit {
         }
         this.buildFileManagerPage();
     }
+
+    async toolChange() {
+        const result = await this.request.get("/machinekit/toolchange");
+        if ("errors" in result) {
+            return this.errorHandler(result.errors);
+        }
+        this.buildFileManagerPage();
+    }
 }
-let machinekit = new Machinekit();
