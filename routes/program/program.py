@@ -3,6 +3,10 @@ import settings
 from decorators.auth import auth
 from decorators.errors import errors
 from flask import Blueprint, request, escape
+from marshmallow import Schema
+from schemas.schemas import ProgramSchema
+from decorators.validate import validate
+
 
 program = Blueprint('program', __name__)
 
@@ -13,11 +17,8 @@ with open("./jsonFiles/errorMessages.json") as f:
 @program.route("/machinekit/program", endpoint='control_program', methods=["POST"])
 @auth
 @errors
+@validate(ProgramSchema)
 def control_program():
-    if not "command" in request.json:
-        raise ValueError(
-            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
-
-    data = request.json
+    data = request.sanitizedRequest
     command = escape(data['command'])
     return settings.controller.run_program(command)

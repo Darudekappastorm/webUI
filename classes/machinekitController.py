@@ -191,16 +191,13 @@ class MachinekitController():
 
         self.ensure_mode(linuxcnc.MODE_MANUAL)
 
-        self.c.jog(linuxcnc.JOG_INCREMENT, int(axes), float(speed), int(increment))
+        self.c.jog(linuxcnc.JOG_INCREMENT, axes, speed, increment)
         return self.errors()
 
 
     @checkerrors
     def home_all_axes(self, command):
         """ Return all axes to the home position """
-        if command != "home" and command != "unhome":
-            raise ValueError("Unknown command", 400,"ValueError")
-      
         if command == "unhome":
             return self.unhome_all_axes()
             
