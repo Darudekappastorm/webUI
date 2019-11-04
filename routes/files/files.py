@@ -9,7 +9,6 @@ from flask import Blueprint, request, escape
 from schemas.schemas import UpdateQueueSchema, OpenFileSchema
 from werkzeug.utils import secure_filename
 
-
 config = configparser.ConfigParser()
 config.read("default.ini")
 files = Blueprint('files', __name__)
@@ -32,7 +31,7 @@ def return_files():
         result = cur.fetchall()
         return {"result": result, "file_queue": settings.file_queue}
     except Exception as e:
-        settings.logger.critical(e)
+        print(e)
         return {"errors": errorMessages['9']}, 500
 
 
@@ -98,7 +97,6 @@ def upload():
         message, status, errType = e
         return {"errors": {"message": message, "status": status, "type": errType}}, status
     except Exception as e:
-        settings.logger.critical(e)
         return {"errors": errorMessages['9']}, 500
 
 

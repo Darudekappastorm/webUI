@@ -7,6 +7,8 @@ from marshmallow import Schema
 from config.startup import app
 
 app = app()
+settings.init()
+settings.mysql = app.mysql
 config = configparser.ConfigParser()
 config.read("default.ini")
 
@@ -23,10 +25,26 @@ else:
             config["server"]["axis_config"])
         settings.machinekit_running = True
     except (linuxcnc.error) as e:
-        print("Machinekit is down please start machinekit and then restart the server")
+        print(
+            "Machinekit is down please start machinekit and then restart the server")
     except Exception as e:
-        settings.logger.critical(e)
         sys.exit({"errors": [e]})
+
+
+@app.route("/", methods=['GET'])
+def home():
+    """Landing page."""
+    feed_override = 120
+    spindle_override = 100
+    max_velocity = 3200
+    if config["server"]["mockup"] == 'false':
+        feed_override = (
+            float(settings.controller.max_feed_override) * 100)
+        spindle_override = (
+            float(settings.controller.max_spindle_override) * 100)
+        max_velocity = settings.controller.max_velocity
+    return render_template('/index.html', max_feed_override=feed_override, max_spindle_override=spindle_override, maxvel=max_velocity)
+
 
 if __name__ == "__main__":
     app.run('0.0.0.0',

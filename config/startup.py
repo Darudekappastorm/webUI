@@ -1,6 +1,7 @@
 import settings
 import logging
 import configparser
+import sys
 from flask import Flask, render_template
 from flask_cors import CORS
 from flask_mysqldb import MySQL
@@ -30,31 +31,4 @@ def app():
     app.register_blueprint(spindle)
     app.register_blueprint(program)
     app.register_blueprint(files)
-
-    app.logger = logging.getLogger(__name__)
-    app.logger.setLevel(logging.WARNING)
-    file_handler = logging.FileHandler('logfile.log')
-    formatter = logging.Formatter(
-        '%(asctime)s : %(levelname)s : %(name)s : %(message)s')
-    file_handler.setFormatter(formatter)
-
-    settings.init()
-    settings.mysql = app.mysql
-    settings.logger = app.logger
-    app.logger.addHandler(file_handler)
-
-    @app.route("/", methods=['GET'])
-    def home():
-        """Landing page."""
-        feed_override = 120
-        spindle_override = 100
-        max_velocity = 3200
-        if config["server"]["mockup"] == 'false':
-            feed_override = (
-                float(settings.controller.max_feed_override) * 100)
-            spindle_override = (
-                float(settings.controller.max_spindle_override) * 100)
-            max_velocity = settings.controller.max_velocity
-        return render_template('/index.html', max_feed_override=feed_override, max_spindle_override=spindle_override, maxvel=max_velocity)
-
     return app
