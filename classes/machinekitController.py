@@ -300,12 +300,10 @@ class MachinekitController():
             brake_command = linuxcnc.BRAKE_ENGAGE
         else:
             brake_command = linuxcnc.BRAKE_RELEASE
+
         if self.s.spindle_brake == brake_command:
             return {"errors": "Command could not be executed because the spindle_brake is already in this state"}
         
-        if self.s.interp_state is not linuxcnc.INTERP_IDLE:
-            return {"errors": "Cannot execute command when machine interp state isn't idle"}
-
         self.ensure_mode(linuxcnc.MODE_MANUAL)
         self.c.brake(brake_command)
 
@@ -314,9 +312,6 @@ class MachinekitController():
     @checkerrors
     def spindle_direction(self, command):
         """ Command takes parameters spindle_forward and spindle_reverse"""
-        if "spindle_forward" not in command and "spindle_reverse" not in command:
-            raise ValueError("unknown command", 400, "ValueError")
-
         self.s.poll() 
         commands = {
             "spindle_forward": linuxcnc.SPINDLE_FORWARD, 

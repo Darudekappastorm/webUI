@@ -1,8 +1,6 @@
 @url = 192.168.1.116:5000
 @token = test_secret
 
-GET http://{{url}}
-
 ###
 GET http://{{url}}/server/files
 API_KEY: {{token}}
@@ -13,7 +11,7 @@ API_KEY: {{token}}
 Content-Type: application/json
 
 {
-    "new_queue": ["smile.nc"]
+    "new_queue": ["test.ngc", "test.ngc"]
 }
 
 ###
@@ -22,13 +20,15 @@ API_KEY: {{token}}
 Content-Type: application/json
 
 {
-    "name": "test.nc"
+    "name": "test.ngc"
 }
+
+
 ###
 POST http://{{url}}/machinekit/halcmd
 API_KEY: {{token}}
 Content-Type: application/json
 
 {
-    "halcmd": "showq"
+    "halcmd": "show"
 }
