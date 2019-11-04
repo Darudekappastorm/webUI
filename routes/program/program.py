@@ -6,8 +6,6 @@ from flask import Blueprint, request, escape
 from marshmallow import Schema
 from schemas.schemas import ProgramSchema
 from decorators.validate import validate
-
-
 program = Blueprint('program', __name__)
 
 with open("./jsonFiles/errorMessages.json") as f:

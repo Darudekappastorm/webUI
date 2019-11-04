@@ -7,9 +7,12 @@ import configparser
 from flask_cors import CORS
 from flask_mysqldb import MySQL
 from decorators.auth import auth
+from decorators.validate import validate
 from werkzeug.utils import secure_filename
 from flask import Flask, request, redirect, abort, escape, render_template, jsonify
 from decorators.errors import errors
+from marshmallow import Schema
+from schemas.schemas import UpdateQueueSchema, OpenFileSchema
 
 from routes.axes.axes import axes
 from routes.status.status import status
@@ -99,15 +102,9 @@ def return_files():
 @app.route("/server/update_file_queue", endpoint='update_file_queue', methods=["POST"])
 @auth
 @errors
+@validate(UpdateQueueSchema)
 def update_file_queue():
-    if not "new_queue" in request.json:
-        raise ValueError(
-            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
-    if not type(settings.file_queue) == list:
-        raise ValueError(
-            errorMessages['5']['message'], errorMessages['5']['status'], errorMessages['5']['type'])
-
-    data = request.json
+    data = request.sanitizedRequest
     new_queue = data["new_queue"]
 
     for item in new_queue:
@@ -146,14 +143,10 @@ def halcmd():
 @app.route("/machinekit/open_file", endpoint='open_file', methods=["POST"])
 @auth
 @errors
+@validate(OpenFileSchema)
 def open_file():
-    if not "name" in request.json:
-        raise ValueError(
-            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
-
-    data = request.json
-    name = escape(data["name"])
-    return settings.controller.open_file(config['storage']['upload_folder'], name)
+    data = request.sanitizedRequest
+    return settings.controller.open_file(config['storage']['upload_folder'], escape(data["name"]))
 
 
 @app.route("/server/file_upload", endpoint='upload', methods=["POST"])

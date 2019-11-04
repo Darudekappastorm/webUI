@@ -216,9 +216,6 @@ class MachinekitController():
 
     def run_program(self, command):
         """ Run the current file. Takes command as start || pause || stop || default=resume"""
-        if command != "start" and command != "pause" and command != "stop" and command != "resume":
-            raise ValueError("Unknown command",400,"ValueError")
-
         self.ensure_mode(linuxcnc.MODE_AUTO, linuxcnc.MODE_MDI)
 
         if command == "start":
@@ -336,9 +333,6 @@ class MachinekitController():
     @checkerrors
     def spindle_speed(self, command):
         """ Command takes parameters spindle_increase and spindle_decrease """
-        if "spindle_increase" not in command and "spindle_decrease" not in command:
-            raise ValueError("Unknown command", 400,"ValueError")
-    
         self.s.poll()
 
         if not self.s.spindle_enabled:
