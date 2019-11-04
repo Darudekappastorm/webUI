@@ -431,8 +431,8 @@ class MachinekitController():
         if self.s.interp_state is not linuxcnc.INTERP_IDLE:
             return {"errors": "Cannot execute command when interp is not idle"}
      
-        # toolno, z_offset,  x_offset, diameter, frontangle, backangle, orientation
-        # self.s.tool_offset(int, float, float, float, float, float, int)
+        #jointnum, home_pos, home_offset, home_final_velocity, home_search_velocity, home_final_velocity, use_index, ignore_limits, is_shared, home_sequence, volatile_home, locking_indexer
+        self.c.set_home_parameters(0, 0, 0, 10, 10, 10, 10, 10, 1, 1, 2, 1)
         return self.errors()
 
 

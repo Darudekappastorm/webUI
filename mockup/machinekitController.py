@@ -54,7 +54,7 @@ class linuxcnc():
             self.task_mode = linuxcnc.MODE_MDI
             self.axis = self.generateAxis()
 
-            self.spindle_speed = 300
+            self.spindle_speed = 0
             self.spindle_enabled = 1
             self.spindle_brake = 0
             self.spindle_direction = 1
@@ -316,7 +316,7 @@ class MachinekitController():
             return {"errors": "Can't start machine because it is currently running or paused in a project"}
         self.ensure_mode(linuxcnc.MODE_AUTO)
         self.c.auto(linuxcnc.AUTO_RUN, 9)
-
+   
         return self.errors()
 
     @checkerrors

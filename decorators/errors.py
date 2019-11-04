@@ -3,6 +3,7 @@ import json
 import configparser
 import settings
 import werkzeug
+from marshmallow import ValidationError
 
 config = configparser.ConfigParser()
 config.read("default.ini")
@@ -20,9 +21,10 @@ def errors(f):
             if settings.machinekit_running == False:
                 raise RuntimeError(
                     errorMessages['0']['message'], errorMessages['0']['status'], errorMessages['0']['type'])
-
             return f(*args, **kwargs)
 
+        except ValidationError as err:
+            return {"errors": {"keys": err.messages, "status": 400, "type": "ValidationError"}}, 400
         except ValueError as e:
             message, status, errType = e
             return {"errors": {"message": message, "status": status, "type": errType}}, status

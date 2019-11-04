@@ -7,8 +7,8 @@ window.onload = async () => {
     new Sortable.default(document.getElementById('tbody_queue'), {
         draggable: 'tr'
     });
-
 }
+
 export class Machinekit {
     state = {}
     displayedErrors = [];

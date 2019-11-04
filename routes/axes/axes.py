@@ -3,6 +3,8 @@ import settings
 from decorators.auth import auth
 from decorators.errors import errors
 from flask import Blueprint, request, escape
+from marshmallow import Schema, fields, ValidationError
+from schemas.schemas import CommandSchema
 
 axes = Blueprint('axes', __name__)
 with open("./jsonFiles/errorMessages.json") as f:
@@ -13,11 +15,11 @@ with open("./jsonFiles/errorMessages.json") as f:
 @auth
 @errors
 def set_home_axes():
-    if not "command" in request.json:
-        raise ValueError(
-            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
-
     data = request.json
+    errors = CommandSchema().load({"command": data['command']})
+    if errors.errors:
+        raise ValidationError(errors.errors)
+
     command = escape(data['command'])
     return settings.controller.home_all_axes(command)
 
