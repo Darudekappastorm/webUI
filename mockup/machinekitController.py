@@ -424,10 +424,6 @@ class MachinekitController():
     @checkerrors
     def spindleoverride(self, value):
         """ Spindle override floatyboii betweem 0 and 1"""
-        if value > 1 or value < 0:
-            raise ValueError(
-                "Value is outside of range. min 0 max 1", 400, "ValueError")
-                
         self.s.spindlerate = value
         return self.errors()
 
@@ -440,9 +436,6 @@ class MachinekitController():
     @checkerrors
     def feedoverride(self, value):
         """ Feed override float between 0 and 1.2"""
-        if value > 1.2 or value < 0:
-            raise ValueError("Value is outside of range. min 0 max 1.2", 400,"ValueError")
-
         self.s.poll()
         self.s.feedrate = value
         return self.errors()
