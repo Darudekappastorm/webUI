@@ -15,7 +15,7 @@ export class Machinekit {
     page = "controller";
 
     slowInterval = 2000
-    fastInterval = 200;
+    fastInterval = 500;
     interval = 200;
 
     file_queue = [];
@@ -231,7 +231,6 @@ export class Machinekit {
         document.getElementById("spindle-override").value = Math.round((spindlerate * 100));
         document.getElementById("spindle-override-output").innerHTML = Math.round((spindlerate * 100));
 
-        console.log(velocity);
         document.getElementById("max-velocity").value = Math.round((velocity * 60));
         document.getElementById("max-velocity-output").innerHTML = Math.round((velocity * 60));
     }

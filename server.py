@@ -5,6 +5,7 @@ import configparser
 from flask import render_template
 from marshmallow import Schema
 from config.startup import app
+import math
 
 app = app()
 settings.init()
@@ -44,9 +45,7 @@ def home():
             float(settings.controller.max_feed_override) * 100)
         spindle_override = (
             float(settings.controller.max_spindle_override) * 100)
-        max_velocity = settings.controller.max_velocity
-        print(max_velocity)
-
+        max_velocity = (float(settings.controller.velocity) * 60)
     return render_template('/index.html', max_feed_override=feed_override, max_spindle_override=spindle_override, maxvel=max_velocity)
 
 

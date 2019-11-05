@@ -280,10 +280,10 @@
                         </div>
 
                         <div id="max-velocity-control">
-                            <label>Max velocity {{maxvel}}</label>
+                            <label>Max velocity</label>
                             <input type="range" min="0" max="{{maxvel}}" value="0" onkeydown="return false;"
                                 onchange="machinekit.controlOverrides(this, '/machinekit/maxvel')" id="max-velocity" />
-                            <span><output id="max-velocity-output">3200</output></span>
+                            <span><output id="max-velocity-output">{{maxvel}}</output></span>
                         </div>
                     </form>
                 </div>
