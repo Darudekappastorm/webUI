@@ -46,10 +46,9 @@ export class Machinekit {
             const result = await this.request.get("/machinekit/status");
 
             if ("errors" in result) {
-                console.log(result.errors);
                 return this.errorHandler(result.errors);
             }
-            const isSameState = this.controlintervalSpeedAndCompareStates(result);
+            const isSameState = await this.controlintervalSpeedAndCompareStates(result);
             this.state = result;
 
             //Only update the page classes if the states are not exactly the same
@@ -60,7 +59,7 @@ export class Machinekit {
         }
     }
 
-    controlintervalSpeedAndCompareStates(result) {
+    async controlintervalSpeedAndCompareStates(result) {
         //On first connect there is nothing to compare
         if (this.firstConnect) {
             if (this.file_queue.length > 0) {
@@ -94,7 +93,7 @@ export class Machinekit {
                     //Remove last item from the queue
                     this.file_queue.splice(0, 1);
                     //Update the queue on the server
-                    this.request.post("/server/update_file_queue", {
+                    await this.request.post("/server/update_file_queue", {
                         "new_queue": this.file_queue
                     });
                     //Select the first item
@@ -103,7 +102,7 @@ export class Machinekit {
                         file = "";
                     }
                     //Open the first item on the machine
-                    this.request.post("/machinekit/open_file", {
+                    await this.request.post("/machinekit/open_file", {
                         "name": file
                     });
                 }

@@ -389,7 +389,6 @@ class MachinekitController():
         self.c.reset_interpreter()
         self.c.wait_complete()
         self.c.program_open(os.path.join(path + "/" + fileName))
-        self.c.wait_complete()
         return self.errors()
 
     @checkerrors
