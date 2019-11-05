@@ -16,12 +16,14 @@ export class Machinekit {
 
     slowInterval = 2000
     fastInterval = 200;
-    interval = 100;
+    interval = 200;
 
     file_queue = [];
     local_file_queue = [];
     files_on_server = [];
     firstConnect = true;
+
+    isWaiting = false;
 
     constructor() {
         this.request = new Request();
@@ -39,16 +41,22 @@ export class Machinekit {
     }
 
     async getMachineVitals() {
-        const result = await this.request.get("/machinekit/status");
-        if ("errors" in result) {
-            return this.errorHandler(result.errors);
-        }
-        const isSameState = this.controlintervalSpeedAndCompareStates(result);
-        this.state = result;
+        if (!this.isWaiting) {
+            this.isWaiting = true;
+            const result = await this.request.get("/machinekit/status");
 
-        //Only update the page classes if the states are not exactly the same
-        if (!isSameState) {
-            this.buildControllerPage();
+            if ("errors" in result) {
+                console.log(result.errors);
+                return this.errorHandler(result.errors);
+            }
+            const isSameState = this.controlintervalSpeedAndCompareStates(result);
+            this.state = result;
+
+            //Only update the page classes if the states are not exactly the same
+            if (!isSameState) {
+                this.buildControllerPage();
+            }
+            this.isWaiting = false;
         }
     }
 
@@ -223,6 +231,7 @@ export class Machinekit {
         document.getElementById("spindle-override").value = Math.round((spindlerate * 100));
         document.getElementById("spindle-override-output").innerHTML = Math.round((spindlerate * 100));
 
+        console.log(velocity);
         document.getElementById("max-velocity").value = Math.round((velocity * 60));
         document.getElementById("max-velocity-output").innerHTML = Math.round((velocity * 60));
     }

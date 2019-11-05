@@ -30,7 +30,6 @@ def return_files():
         result = cur.fetchall()
         return {"result": result, "file_queue": settings.file_queue}
     except Exception as e:
-        print(e)
         return {"errors": errorMessages['internal-server-error']}, errorMessages['internal-server-error']['status']
 
 

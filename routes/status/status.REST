@@ -34,7 +34,7 @@ API_KEY: {{token}}
 Content-Type: application/json
 
 {
-    "command": 300
+    "command": 3000
 }
 
 ###

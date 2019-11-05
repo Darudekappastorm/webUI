@@ -1,3 +1,4 @@
+import toastedmarshmallow
 from marshmallow import Schema, fields, validates, ValidationError
 import json
 
@@ -70,7 +71,7 @@ class SpindleEnabledSchema(CommandSchema):
 
 
 class SpindleOverrideSchema(Schema):
-    command = fields.Float(required=True, strict=True)
+    command = fields.Float(required=True)
 
     @validates("command")
     def validate_min_max(self, value):
@@ -79,7 +80,7 @@ class SpindleOverrideSchema(Schema):
 
 
 class FeedOverrideSchema(Schema):
-    command = fields.Float(required=True, strict=True)
+    command = fields.Float(required=True)
 
     @validates("command")
     def validate_min_max(self, value):
@@ -88,7 +89,7 @@ class FeedOverrideSchema(Schema):
 
 
 class MaxvelOverrideSchema(Schema):
-    command = fields.Float(required=True, strict=True)
+    command = fields.Float(required=True)
 
 
 class StatusSchema(CommandSchema):

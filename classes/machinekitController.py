@@ -55,7 +55,6 @@ class MachinekitController():
 
     def interp_state(self):
         """Return current interp state of machine. Ex: INTERP_IDLE"""
-        self.s.poll()
         modes = ["INTERP_IDLE", "INTERP_READING",
             "INTERP_PAUSED", "INTERP_WAITING"]
         state = self.s.interp_state
@@ -230,9 +229,9 @@ class MachinekitController():
         self.s.poll()
         if self.s.task_mode not in (linuxcnc.MODE_AUTO, linuxcnc.MODE_MDI) or self.s.interp_state in (linuxcnc.INTERP_READING, linuxcnc.INTERP_WAITING, linuxcnc.INTERP_PAUSED):
             return {"errors": "Can't start machine because it is currently running or paused in a project"}
+
         self.ensure_mode(linuxcnc.MODE_AUTO)
         self.c.auto(linuxcnc.AUTO_RUN, 0)
-    
         return self.errors()
 
     @checkerrors
@@ -351,25 +350,20 @@ class MachinekitController():
     def spindleoverride(self, value):
         """ Spindle override floatyboii betweem 0 and 1"""
         self.c.spindleoverride(value)
-        self.c.wait_complete()
         return self.errors()
 
     @checkerrors
     def maxvel(self, maxvel):
         """ Takes int of maxvel min"""
         self.c.maxvel(maxvel / 60.)
-        self.c.wait_complete()
-
         return self.errors()
     
 
     @checkerrors
     def feedoverride(self, value):
         """ Feed override float between 0 and 1.2"""   
-        self.s.poll()
+        # self.s.poll()
         self.c.feedrate(value)
-        self.c.wait_complete()
-
         return self.errors()
 
     @checkerrors
@@ -392,7 +386,6 @@ class MachinekitController():
         self.c.wait_complete()
         self.c.program_open(os.path.join(path + "/" + fileName))
         self.c.wait_complete()
-
         return self.errors()
 
     @checkerrors

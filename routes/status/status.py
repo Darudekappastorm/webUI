@@ -7,7 +7,6 @@ from decorators.errors import errors
 from decorators.validate import validate
 from flask import Blueprint, request, escape
 import configparser
-from marshmallow import Schema
 from schemas.schemas import StatusSchema, FeedOverrideSchema, MaxvelOverrideSchema
 
 config = configparser.ConfigParser()

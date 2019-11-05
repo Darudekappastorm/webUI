@@ -14,12 +14,14 @@ config.read("default.ini")
 
 if config['server']['mockup'] == 'true':
     from mockup.machinekitController import MachinekitController
+
     print("Starting mock server")
     settings.controller = MachinekitController()
     settings.machinekit_running = True
 else:
     import linuxcnc
     from classes.machinekitController import MachinekitController
+
     try:
         settings.controller = MachinekitController(
             config["server"]["axis_config"])
@@ -43,6 +45,8 @@ def home():
         spindle_override = (
             float(settings.controller.max_spindle_override) * 100)
         max_velocity = settings.controller.max_velocity
+        print(max_velocity)
+
     return render_template('/index.html', max_feed_override=feed_override, max_spindle_override=spindle_override, maxvel=max_velocity)
 
 
