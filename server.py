@@ -13,8 +13,8 @@ config = configparser.ConfigParser()
 config.read("default.ini")
 
 if config['server']['mockup'] == 'true':
-    print("Mockup")
     from mockup.machinekitController import MachinekitController
+    print("Starting mock server")
     settings.controller = MachinekitController()
     settings.machinekit_running = True
 else:

@@ -11,12 +11,15 @@ axes = Blueprint('axes', __name__)
 with open("./jsonFiles/errorMessages.json") as f:
     errorMessages = json.load(f)
 
-
+##
+# All axe movement routes are in this module
+##
 @axes.route("/machinekit/axes/home", endpoint='set_home_axes', methods=["POST"])
 @auth
 @errors
 @validate(HomeSchema)
 def set_home_axes():
+    """ Reset all axes to the home position """
     data = request.sanitizedRequest
     command = escape(data['command'])
     return settings.controller.home_all_axes(command)
@@ -27,6 +30,7 @@ def set_home_axes():
 @errors
 @validate(CommandSchema)
 def send_command():
+    """ Send an MDI command to control individual axes """
     data = request.sanitizedRequest
     command = escape(data["command"])
     return settings.controller.mdi_command(command)
@@ -37,5 +41,6 @@ def send_command():
 @errors
 @validate(ManualControlSchema)
 def manual():
+    """ Manually control individual axe """
     data = request.sanitizedRequest
     return settings.controller.manual_control(data['axes'], data['speed'], data['increment'])

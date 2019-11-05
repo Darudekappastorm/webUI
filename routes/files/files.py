@@ -6,7 +6,7 @@ from decorators.auth import auth
 from decorators.errors import errors
 from decorators.validate import validate
 from flask import Blueprint, request, escape
-from schemas.schemas import UpdateQueueSchema, OpenFileSchema
+from schemas.schemas import UpdateQueueSchema, OpenFileSchema, HalcmdSchema
 from werkzeug.utils import secure_filename
 
 config = configparser.ConfigParser()
@@ -15,14 +15,13 @@ files = Blueprint('files', __name__)
 
 with open("./jsonFiles/errorMessages.json") as f:
     errorMessages = json.load(f)
-with open("./jsonFiles/halCommands.json") as f:
-    halCommands = json.load(f)
 
 
 @files.route("/server/files", endpoint='return_files', methods=["GET"])
 @auth
 @errors
 def return_files():
+    """ Return all machinekit files from the server """
     try:
         cur = settings.mysql.connection.cursor()
         cur.execute("""
@@ -40,6 +39,7 @@ def return_files():
 @errors
 @validate(UpdateQueueSchema)
 def update_file_queue():
+    """ Update the file queue that is fed into machinekit """
     data = request.sanitizedRequest
     new_queue = data["new_queue"]
 
@@ -57,6 +57,7 @@ def update_file_queue():
 @errors
 @validate(OpenFileSchema)
 def open_file():
+    """ Open a file """
     data = request.sanitizedRequest
     return settings.controller.open_file(config['storage']['upload_folder'], escape(data["name"]))
 
@@ -64,6 +65,7 @@ def open_file():
 @files.route("/server/file_upload", endpoint='upload', methods=["POST"])
 @auth
 def upload():
+    """ Upload a nc, ngc, gcode file to the server """
     try:
         if "file" not in request.files:
             raise ValueError(
@@ -103,22 +105,11 @@ def upload():
 @files.route("/machinekit/halcmd", endpoint='halcmd', methods=["POST"])
 @auth
 @errors
+@validate(HalcmdSchema)
 def halcmd():
-    if not "halcmd" in request.json:
-        raise ValueError(
-            errorMessages['2']['message'], errorMessages['2']['status'], errorMessages['2']['type'])
-    command = request.json["halcmd"]
-    i_command = command.split(' ', 1)[0]
-
-    isInList = False
-    for item in halCommands:
-        if item['command'] == i_command:
-            isInList = True
-            break
-    if not isInList:
-        raise ValueError(
-            errorMessages['8']['message'], errorMessages['8']['status'], errorMessages['8']['type'])
-
+    """ Accepts whitelisted halcmds """
+    data = request.sanitizedRequest
+    command = data["halcmd"]
     os.system('halcmd ' + command + " > output.txt")
     f = open("output.txt", "r")
     return {"success": f.read()}

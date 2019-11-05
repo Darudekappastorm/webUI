@@ -1,4 +1,5 @@
 from marshmallow import Schema, fields, validates, ValidationError
+import json
 
 
 class CommandSchema(Schema):
@@ -85,3 +86,25 @@ class UpdateQueueSchema(Schema):
 
 class OpenFileSchema(Schema):
     name = fields.String(required=True)
+
+
+class HalcmdSchema(Schema):
+    halcmd = fields.String(required=True)
+
+    @validates("halcmd")
+    def validate_halcmd(self, value):
+        with open("./jsonFiles/halCommands.json") as f:
+            halCommands = json.load(f)
+
+        user_command = value.split(' ', 1)[0]
+        isInList = False
+        for command in halCommands:
+            if command['command'] == user_command:
+                isInList = True
+                break
+
+        if not isInList:
+            raise ValidationError("Unknow command")
+
+        if "&&" in value:
+            raise ValidationError("Not allowed to chain multiple commands")

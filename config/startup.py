@@ -12,7 +12,6 @@ from routes.program.program import program
 from routes.spindle.spindle import spindle
 from routes.files.files import files
 
-
 config = configparser.ConfigParser()
 config.read("default.ini")
 

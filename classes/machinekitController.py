@@ -144,9 +144,6 @@ class MachinekitController():
     @checkerrors
     def machine_status(self, command):
         """ Toggle power/estop. takes 'estop' or 'power' as command"""
-        if command != "estop" and command != "power":
-            raise ValueError("Unknown command",  400, "ValueError")
-
         self.s.poll()
         if command == "estop":
             if self.s.estop == linuxcnc.STATE_ESTOP:
@@ -291,9 +288,6 @@ class MachinekitController():
     @checkerrors
     def spindle_brake(self, command):
         """ Engage the spindle brake"""
-        if "brake_engage" not in command and "brake_release" not in command:
-            raise ValueError("unknown command", 400, "ValueError")
-
         self.s.poll()
         brake_command = None
         if "brake_engage" in command:
@@ -344,9 +338,6 @@ class MachinekitController():
 
     @checkerrors
     def spindle_enabled(self, command):
-        if "spindle_off" not in command and "spindle_on" not in command:
-            raise ValueError("Unknown command", 400, "ValueError")
-
         commands = {
             "spindle_off": linuxcnc.SPINDLE_OFF,
             "spindle_on": linuxcnc.SPINDLE_CONSTANT
@@ -360,7 +351,8 @@ class MachinekitController():
     def spindleoverride(self, value):
         """ Spindle override floatyboii betweem 0 and 1"""
         if value > 1 or value < 0:
-            return {"errors": "Value outside of limits"}
+            raise ValueError(
+                "Value is outside of range. min 0 max 1", 400, "ValueError")
 
         self.c.spindleoverride(value)
         self.c.wait_complete()

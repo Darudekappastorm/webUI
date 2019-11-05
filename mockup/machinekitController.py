@@ -202,9 +202,6 @@ class MachinekitController():
     @checkerrors
     def machine_status(self, command):
         """ Toggle estop and power with command estop || power"""
-        if command != "estop" and command != "power":
-            raise ValueError("Unknown command ", 400, "ValueError")
-
         self.s.poll()
         if command == "estop":
             if self.s.estop == linuxcnc.STATE_ESTOP:
@@ -266,9 +263,6 @@ class MachinekitController():
     @checkerrors
     def home_all_axes(self, command):
         """ Set all axes home """
-        if command != "home" and command != "unhome":
-            raise ValueError("Unknown command", 400, "ValueError")
-
         if command == "unhome":
             return self.unhome_all_axes()
 
@@ -289,9 +283,6 @@ class MachinekitController():
 
     def run_program(self, command):
         """ Command = start || pause || stop || resume = default"""
-        if command != "start" and command != "pause" and command != "stop" and command != "resume":
-            raise ValueError("Unknown command ", 400, "ValueError")
-
         self.ensure_mode(linuxcnc.MODE_AUTO, linuxcnc.MODE_MDI)
 
         if command == "start":
@@ -371,9 +362,6 @@ class MachinekitController():
     @checkerrors
     def spindle_brake(self, command):
         """ Engage the spindle brake"""
-        if "brake_engage" not in command and "brake_release" not in command:
-            raise ValueError("unknown command", 400, "ValueError")
-
         self.s.poll()
         brake_command = None
 
@@ -394,9 +382,6 @@ class MachinekitController():
     @checkerrors
     def spindle_direction(self, command):
         """ Command takes parameters spindle_forward and spindle_reverse"""
-        if "spindle_forward" not in command and "spindle_reverse" not in command:
-            raise ValueError("unknown command", 400, "ValueError")
-
         self.s.poll() 
         commands = {
             "spindle_forward": linuxcnc.SPINDLE_FORWARD, 
@@ -413,9 +398,6 @@ class MachinekitController():
     @checkerrors
     def spindle_speed(self, command):
         """ Command takes parameters spindle_increase and spindle_decrease """
-        if "spindle_increase" not in command and "spindle_decrease" not in command:
-            raise ValueError("Unknown command", 400, "ValueError")
-    
         self.s.poll()
 
         if not self.s.spindle_enabled:
@@ -431,9 +413,6 @@ class MachinekitController():
 
     @checkerrors
     def spindle_enabled(self, command):
-        if "spindle_off" not in command and "spindle_on" not in command:
-            raise ValueError("Unknown command", 400, "ValueError")
-
         commands = {
             "spindle_off": linuxcnc.SPINDLE_OFF,
             "spindle_on": linuxcnc.SPINDLE_CONSTANT
@@ -446,7 +425,9 @@ class MachinekitController():
     def spindleoverride(self, value):
         """ Spindle override floatyboii betweem 0 and 1"""
         if value > 1 or value < 0:
-            return {"errors": "Value outside of limits"}
+            raise ValueError(
+                "Value is outside of range. min 0 max 1", 400, "ValueError")
+                
         self.s.spindlerate = value
         return self.errors()
 
