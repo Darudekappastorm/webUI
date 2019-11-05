@@ -72,6 +72,24 @@ class SpindleEnabledSchema(CommandSchema):
 class SpindleOverrideSchema(Schema):
     command = fields.Float(required=True, strict=True)
 
+    @validates("command")
+    def validate_min_max(self, value):
+        if value < 0 or value > 1:
+            raise ValidationError(errorMessages['invalid-range'])
+
+
+class FeedOverrideSchema(Schema):
+    command = fields.Float(required=True, strict=True)
+
+    @validates("command")
+    def validate_min_max(self, value):
+        if value < 0 or value > 1.2:
+            raise ValidationError(errorMessages['invalid-range'])
+
+
+class MaxvelOverrideSchema(Schema):
+    command = fields.Float(required=True, strict=True)
+
 
 class StatusSchema(CommandSchema):
     @validates("command")

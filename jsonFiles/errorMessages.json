@@ -68,5 +68,8 @@
     },
     "invalid-multiple-commands": {
         "message": "Not allowed to chain multiple commands"
+    },
+    "invalid-range": {
+        "message": "Value is out of range"
     }
 }
