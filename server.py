@@ -48,5 +48,6 @@ def home():
 
 if __name__ == "__main__":
     app.run('0.0.0.0',
-            debug=(True if config['server'].get('debug', False) else False),
+            debug=((config['server'].get('debug')
+                    == 'true') if True else False),
             port=config['server']['port'])

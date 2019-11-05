@@ -30,5 +30,5 @@ API_KEY: {{token}}
 Content-Type: application/json
 
 {
-    "halcmd": "show"
+    "halcmd": "show && show"
 }
