@@ -18,19 +18,19 @@ def auth(f):
     def wrapper(*args, **kwargs):
         if ip_auth_enabled:
             if request.remote_addr in blackList:
-                return {"errors": {"message": "This IP address has been blocked"}}
+                return {"errors": errorMessages['whitelist-error']}, errorMessages['whitelist-error']['status']
 
             if request.method == "POST":
                 if(request.remote_addr not in whiteList):
-                    return {"errors": {"message": "You are not authorized to control the machine"}}
+                    return {"errors": errorMessages['whitelist-error']}, errorMessages['whitelist-error']['status']
 
         headers = request.headers
         if not "API_KEY" in headers:
-            return {"errors": errorMessages['1']}, 403
+            return {"errors": errorMessages['authorization']}, errorMessages['authorization']['status']
 
         auth = headers.get("API_KEY")
         if auth != config['security']['token']:
-            return {"errors": errorMessages['1']}, 403
+            return {"errors": errorMessages['authorization']}, errorMessages['authorization']['status']
 
         return f(*args, **kwargs)
 

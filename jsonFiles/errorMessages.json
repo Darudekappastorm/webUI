@@ -1,57 +1,72 @@
 {
-    "0": {
+    "machinekit-down": {
         "message": "Machinekit is not running please restart machinekit and then the server!",
         "status": 500,
         "type": "InternalServerError"
     },
-    "1": {
+    "authorization": {
         "message": "Authorization error. Invalid API key.",
-        "status": 403,
+        "status": 401,
         "type": "AuthorizationError"
     },
-    "2": {
-        "message": "Unknown key",
-        "status": 400,
-        "type": "ValueError"
-    },
-    "3": {
-        "message": "Request cannot be empty",
-        "status": 400,
-        "type": "ValueError"
-    },
-    "4": {
+    "content-not-allowed": {
         "message": "Request can only be Content-Type: application/json",
         "status": 415,
         "type": "ValueError"
     },
-    "5": {
-        "message": "New_queue must be of type list/array",
-        "status": 400,
-        "type": "ValueError"
-    },
-    "6": {
+    "file-not-found": {
         "message": "File not found",
         "status": 404,
         "type": "NameError"
     },
-    "7": {
+    "file-exists": {
         "message": "File with given name already on server",
         "status": 400,
         "type": "ValueError"
     },
-    "8": {
-        "message": "Command not in list with hal commands",
-        "status": 404,
-        "type": "ValueError"
-    },
-    "9": {
+    "internal-server-error": {
         "message": "Something went wrong",
         "status": 500,
         "type": "InternalServerError"
     },
-    "10": {
+    "invalid-content": {
         "message": "Server was unable to decode the send data. Make sure you are sending valid JSON!",
         "status": 400,
         "type": "ValueError"
+    },
+    "whitelist-error": {
+        "message": "This IP address has been blocked or is not allowed to operate the machine",
+        "status": 403,
+        "type": "AuthorizationError"
+    },
+    "input-empty": {
+        "message": "Input cannot be empty"
+    },
+    "invalid-home-command": {
+        "message": "Unknown command. Command must be either home or unhome"
+    },
+    "invalid-program-command": {
+        "message": "Unknown command. Command must be one of: start, pause, stop, resume"
+    },
+    "invalid-spindle-speed-command": {
+        "message": "Unknown command. Command must be either spindle_increase or spindle_decrease"
+    },
+    "invalid-spindle-brake-command": {
+        "message": "Unknown command. Command must be either brake_engaged or brake_disengaged"
+    },
+    "invalid-spindle-direction-command": {
+        "message": "Unknown command. Command must be either spindle_reverse or spindle_forward"
+    },
+    "invalid-spindle-enabled-command": {
+        "message": "Unknown command. Command must be either spindle_on or spindle_off"
+    },
+    "invalid-status-command": {
+        "message": "Unknown command. Command must be either estop or power"
+    },
+    "invalid-command": {
+        "message": "Unknow command"
+    },
+    "invalid-multiple-commands": {
+        "message": "Not allowed to chain multiple commands"
     }
 }

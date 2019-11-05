@@ -31,7 +31,7 @@ def return_files():
         return {"result": result, "file_queue": settings.file_queue}
     except Exception as e:
         print(e)
-        return {"errors": errorMessages['9']}, 500
+        return {"errors": errorMessages['internal-server-error']}, errorMessages['internal-server-error']['status']
 
 
 @files.route("/server/update_file_queue", endpoint='update_file_queue', methods=["POST"])
@@ -46,7 +46,7 @@ def update_file_queue():
     for item in new_queue:
         if not os.path.isfile(config['storage']['upload_folder'] + "/" + escape(item)):
             raise NameError(
-                errorMessages['6']['message'], errorMessages['6']['status'], errorMessages['6']['type'])
+                errorMessages['file-not-found']['message'], errorMessages['file-not-found']['status'], errorMessages['file-not-found']['type'])
 
     settings.file_queue = new_queue
     return {"success": settings.file_queue}
@@ -69,7 +69,7 @@ def upload():
     try:
         if "file" not in request.files:
             raise ValueError(
-                errorMessages['5']['message'], errorMessages['5']['status'], errorMessages['5']['type'])
+                errorMessages['file-not-found']['message'], errorMessages['file-not-found']['status'], errorMessages['file-not-found']['type'])
 
         file = request.files["file"]
         filename = secure_filename(file.filename)
@@ -84,7 +84,7 @@ def upload():
 
         if len(result) > 0:
             raise ValueError(
-                errorMessages['7']['message'], errorMessages['7']['status'], errorMessages['7']['type'])
+                errorMessages['file-exists']['message'], errorMessages['file-exists']['status'], errorMessages['file-exists']['type'])
 
         cur.execute("""
             INSERT INTO files (file_name, file_location)
@@ -99,7 +99,7 @@ def upload():
         message, status, errType = e
         return {"errors": {"message": message, "status": status, "type": errType}}, status
     except Exception as e:
-        return {"errors": errorMessages['9']}, 500
+        return {"errors": errorMessages['internal-server-error']}, errorMessages['internal-server-error']['status']
 
 
 @files.route("/machinekit/halcmd", endpoint='halcmd', methods=["POST"])

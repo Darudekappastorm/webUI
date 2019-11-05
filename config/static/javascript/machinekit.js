@@ -288,10 +288,14 @@ export class Machinekit {
             document.body.className = "server-down";
             return;
         }
-        if (error.status == 403) {
+        if (error.status == 401) {
             this.interval = 50000;
             document.body.className = "not-authorized"
             return;
+        }
+
+        if (error.status == 403) {
+            this.interval = 50000;
         }
 
         this.displayedErrors.push(error.message);
