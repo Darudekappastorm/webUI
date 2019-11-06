@@ -9,7 +9,6 @@ import math
 
 app = app()
 settings.init()
-settings.mysql = app.mysql
 config = configparser.ConfigParser()
 config.read("default.ini")
 
@@ -40,9 +39,10 @@ def home():
     feed_override = 120
     spindle_override = 100
     max_velocity = 3200
-    if config["server"]["mock"] == 'false':
+    if config["server"]["mock"] == 'false' and settings.machinekit_running:
         feed_override = (
             float(settings.controller.max_feed_override) * 100)
+        print(feed_override)
         spindle_override = (
             float(settings.controller.max_spindle_override) * 100)
         max_velocity = (float(settings.controller.max_velocity) * 60)

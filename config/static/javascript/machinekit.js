@@ -260,9 +260,9 @@ export class Machinekit {
                 document.getElementById("tbody_files").innerHTML +=
                     `
                 <tr>
-                    <td>${item[1]}</td>
+                    <td>${item[0]}</td>
                     <td>
-                        <button class="warning" onclick="machinekit.addFilesToQueue('${item[1]}')">Add to queue</button>
+                        <button class="warning" onclick="machinekit.addFilesToQueue('${item[0]}')">Add to queue</button>
                     </td>
                 </tr>`;
             });
@@ -449,7 +449,7 @@ export class Machinekit {
             const lastDot = file.name.lastIndexOf(".");
             const ext = file.name.substring(lastDot + 1);
 
-            if (ext === "nc" || ext === "gcode") {
+            if (ext === "nc" || ext === "gcode" || "ngc") {
                 this.file = file;
 
                 return;
