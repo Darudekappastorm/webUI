@@ -63,7 +63,7 @@ def maxvel():
 @auth
 @errors
 def tool_changer():
-    if config['server']['mockup'] == 'true':
+    if config['server']['mock'] == 'true':
         return {"success": "Command executed"}
     else:
         # Dirty fix to bypass toolchange prompt

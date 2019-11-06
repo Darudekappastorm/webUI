@@ -13,8 +13,8 @@ settings.mysql = app.mysql
 config = configparser.ConfigParser()
 config.read("default.ini")
 
-if config['server']['mockup'] == 'true':
-    from mockup.machinekitController import MachinekitController
+if config['server']['mock'] == 'true':
+    from mock.machinekitController import MachinekitController
 
     print("Starting mock server")
     settings.controller = MachinekitController()
@@ -40,7 +40,7 @@ def home():
     feed_override = 120
     spindle_override = 100
     max_velocity = 3200
-    if config["server"]["mockup"] == 'false':
+    if config["server"]["mock"] == 'false':
         feed_override = (
             float(settings.controller.max_feed_override) * 100)
         spindle_override = (
