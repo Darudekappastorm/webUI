@@ -20,7 +20,7 @@ def auth(f):
             if request.remote_addr in blackList:
                 return {"errors": errorMessages['whitelist-error']}, errorMessages['whitelist-error']['status']
 
-            if request.method == "POST":
+            if request.method in ["POST", "UPDATE", "PUT"]:
                 if(request.remote_addr not in whiteList):
                     return {"errors": errorMessages['whitelist-error']}, errorMessages['whitelist-error']['status']
 

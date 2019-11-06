@@ -1,3 +1,4 @@
 name,path
 test.nc,/home/machinekit/devel/webUI/files
 test.ngc,/home/machinekit/devel/webUI/files
+test_copy.nc,/home/machinekit/devel/webUI/files

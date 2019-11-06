@@ -42,7 +42,6 @@ def home():
     if config["server"]["mock"] == 'false' and settings.machinekit_running:
         feed_override = (
             float(settings.controller.max_feed_override) * 100)
-        print(feed_override)
         spindle_override = (
             float(settings.controller.max_spindle_override) * 100)
         max_velocity = (float(settings.controller.max_velocity) * 60)

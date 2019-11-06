@@ -97,7 +97,8 @@ def upload():
 
         file.save(os.path.join(config['storage']
                                ['upload_folder'] + "/" + filename))
-        return {"success": "file added"}
+
+        return {"success": "file added"}, 201
     except ValueError as e:
         message, status, errType = e
         return {"errors": {"message": message, "status": status, "type": errType}}, status

@@ -1,10 +1,20 @@
 # webUI
-Webinterface to control a CNC machine with 3 axes.
+Webinterface and API to control a CNC machine with the linuxcnc/machinekit software
 
 # Getting started
 If you are running this on a beaglebone with machinekit installed then you should be able to run this without issues.
-If you want to test the webUI without machinekit installed change the mock setting to true in the default.ini.
-To start the flask API simply navigate to the install folder and type: python server.py
+If however you do not have access to machinekit or a beaglebone it is still possible to run the mock variant.
 
-# Mock
-The mock feature is pretty basic, it contains some errors but it wont simulate real machine behaviour.
+All the dependencies are in the Pipfile so we are going to install them now. 
+Run the following commands:
+    - pip install pipenv
+    - pipenv install 
+    - pipenv shell
+
+This should install all dependencies in a virtual environment so that you can run the application with this environment.
+Go to the default.ini settings and set mock to true if you do not have a beaglebone with machinekit. 
+Set ip_authentication_enabled to false if you are just testing. If you want to use this setting you have to whitelist your ip to be able to control the machine.
+Set the host and port to your liking in the .ini file.
+
+If you are all set start the server with: python server.py
+
