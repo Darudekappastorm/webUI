@@ -7,7 +7,7 @@ def validate(schema):
         def validateWrapper(*args, **kwargs):
             """ """
             req = request.json
-            errors = schema().load(req)
+            errors = schema().dump(req)
 
             if errors.errors:
                 raise ValidationError(errors.errors)

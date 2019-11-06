@@ -7,8 +7,7 @@ from decorators.errors import errors
 from decorators.validate import validate
 from flask import Blueprint, request, escape
 import configparser
-from marshmallow import Schema
-from schemas.schemas import StatusSchema, SpindleOverrideSchema
+from schemas.schemas import StatusSchema, FeedOverrideSchema, MaxvelOverrideSchema
 
 config = configparser.ConfigParser()
 config.read("default.ini")
@@ -45,7 +44,7 @@ def set_machinekit_status():
 @status.route("/machinekit/feed", endpoint='set_machinekit_feedrate', methods=["POST"])
 @auth
 @errors
-@validate(SpindleOverrideSchema)
+@validate(FeedOverrideSchema)
 def set_machinekit_feedrate():
     data = request.sanitizedRequest
     return settings.controller.feedoverride(data["command"])
@@ -54,7 +53,7 @@ def set_machinekit_feedrate():
 @status.route("/machinekit/maxvel", endpoint='maxvel', methods=["POST"])
 @auth
 @errors
-@validate(SpindleOverrideSchema)
+@validate(MaxvelOverrideSchema)
 def maxvel():
     data = request.sanitizedRequest
     return settings.controller.maxvel(data["command"])
@@ -64,7 +63,7 @@ def maxvel():
 @auth
 @errors
 def tool_changer():
-    if config['server']['mockup'] == 'true':
+    if config['server']['mock'] == 'true':
         return {"success": "Command executed"}
     else:
         # Dirty fix to bypass toolchange prompt

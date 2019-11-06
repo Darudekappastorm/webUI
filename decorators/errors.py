@@ -17,10 +17,10 @@ def errors(f):
             if request.method == "POST":
                 if not request.json:
                     raise ValueError(
-                        errorMessages['4']['message'], errorMessages['4']['status'], errorMessages['4']['type'])
+                        errorMessages['content-not-allowed']['message'], errorMessages['content-not-allowed']['status'], errorMessages['content-not-allowed']['type'])
             if settings.machinekit_running == False:
                 raise RuntimeError(
-                    errorMessages['0']['message'], errorMessages['0']['status'], errorMessages['0']['type'])
+                    errorMessages['machinekit-down']['message'], errorMessages['machinekit-down']['status'], errorMessages['machinekit-down']['type'])
             return f(*args, **kwargs)
 
         except ValidationError as err:
@@ -35,8 +35,8 @@ def errors(f):
             message, status, errType = e
             return {"errors": {"message": message, "status": status, "type": errType}}, status
         except (werkzeug.exceptions.BadRequest) as e:
-            message, status, errType = errorMessages['10']
-            return {"errors": {"message": errorMessages['10']['message'], "status": errorMessages['10']['status'], "type": errorMessages['10']['type']}}, errorMessages['10']['status']
+            message, status, errType = errorMessages['invalid-content']
+            return {"errors": {"message": errorMessages['invalid-content']['message'], "status": errorMessages['invalid-content']['status'], "type": errorMessages['invalid-content']['type']}}, errorMessages['invalid-content']['status']
         except Exception as e:
             return {"errors": {"message": e.message}}, 500
 

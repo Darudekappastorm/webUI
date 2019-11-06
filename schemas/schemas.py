@@ -1,4 +1,8 @@
 from marshmallow import Schema, fields, validates, ValidationError
+import json
+
+with open("./jsonFiles/errorMessages.json") as f:
+    errorMessages = json.load(f)
 
 
 class CommandSchema(Schema):
@@ -7,7 +11,7 @@ class CommandSchema(Schema):
     @validates('command')
     def validate_command(self, value):
         if len(value) < 1:
-            raise ValidationError("Cannot be empty")
+            raise ValidationError(errorMessages['input-empty'])
 
 
 class HomeSchema(CommandSchema):
@@ -17,8 +21,7 @@ class HomeSchema(CommandSchema):
     def validate_command(self, value):
         # CommandSchema().validate_command(value)
         if value != "home" and value != "unhome":
-            raise ValidationError(
-                "Unknown command. Command must be either home or unhome")
+            raise ValidationError(errorMessages['invalid-home-command'])
 
 
 class ManualControlSchema(Schema):
@@ -31,8 +34,7 @@ class ProgramSchema(CommandSchema):
     @validates('command')
     def validate_program(self, value):
         if value != "start" and value != "pause" and value != "stop" and value != "resume":
-            raise ValidationError(
-                "Unknown command. Command must be one of: start, pause, stop, resume")
+            raise ValidationError(errorMessages['invalid-program-command'])
 
 
 class SpindleSpeedSchema(CommandSchema):
@@ -40,7 +42,7 @@ class SpindleSpeedSchema(CommandSchema):
     def validate_spindle_speed(self, value):
         if value != "spindle_increase" and value != "spindle_decrease":
             raise ValidationError(
-                "Unknown command. Command must be either spindle_increase or spindle_decrease")
+                errorMessages['invalid-spindle-speed-command'])
 
 
 class SpindleBrakeSchema(CommandSchema):
@@ -48,7 +50,7 @@ class SpindleBrakeSchema(CommandSchema):
     def validate_spindle_brake(self, value):
         if value != "brake_engaged" and value != "brake_disengaged":
             raise ValidationError(
-                "Unknown command. Command must be either brake_engaged or brake_disengaged")
+                errorMessages['invalid-spindle-brake-command'])
 
 
 class SpindleDirectionSchema(CommandSchema):
@@ -56,7 +58,7 @@ class SpindleDirectionSchema(CommandSchema):
     def validate_spindle_direction(self, value):
         if value != "spindle_reverse" and value != "spindle_forward":
             raise ValidationError(
-                "Unknown command. Command must be either spindle_reverse or spindle_forward")
+                errorMessages['invalid-spindle-direction-command'])
 
 
 class SpindleEnabledSchema(CommandSchema):
@@ -64,19 +66,36 @@ class SpindleEnabledSchema(CommandSchema):
     def validate_spindle_enabled(self, value):
         if value != "spindle_on" and value != "spindle_off":
             raise ValidationError(
-                "Unknown command. Command must be either spindle_on or spindle_off")
+                errorMessages['invalid-spindle-enabled-command'])
 
 
 class SpindleOverrideSchema(Schema):
-    command = fields.Float(required=True, strict=True)
+    command = fields.Float(required=True)
+
+    @validates("command")
+    def validate_min_max(self, value):
+        if value < 0 or value > 1:
+            raise ValidationError(errorMessages['invalid-range'])
+
+
+class FeedOverrideSchema(Schema):
+    command = fields.Float(required=True)
+
+    @validates("command")
+    def validate_min_max(self, value):
+        if value < 0 or value > 1.2:
+            raise ValidationError(errorMessages['invalid-range'])
+
+
+class MaxvelOverrideSchema(Schema):
+    command = fields.Float(required=True)
 
 
 class StatusSchema(CommandSchema):
     @validates("command")
     def validate_status(self, value):
         if value != "power" and value != "estop":
-            raise ValidationError(
-                "Unknown command. Command must be either estop or power")
+            raise ValidationError(errorMessages['invalid-status-command'])
 
 
 class UpdateQueueSchema(Schema):
@@ -85,3 +104,25 @@ class UpdateQueueSchema(Schema):
 
 class OpenFileSchema(Schema):
     name = fields.String(required=True)
+
+
+class HalcmdSchema(Schema):
+    halcmd = fields.String(required=True)
+
+    @validates("halcmd")
+    def validate_halcmd(self, value):
+        with open("./jsonFiles/halCommands.json") as f:
+            halCommands = json.load(f)
+
+        user_command = value.split(' ', 1)[0]
+        isInList = False
+        for command in halCommands:
+            if command['command'] == user_command:
+                isInList = True
+                break
+
+        if not isInList:
+            raise ValidationError(errorMessages['invalid-command'])
+
+        if "&&" in value:
+            raise ValidationError(errorMessages['invalid-multiple-commands'])

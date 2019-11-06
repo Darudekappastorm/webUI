@@ -15,13 +15,15 @@ export class Machinekit {
     page = "controller";
 
     slowInterval = 2000
-    fastInterval = 200;
-    interval = 100;
+    fastInterval = 500;
+    interval = 200;
 
     file_queue = [];
     local_file_queue = [];
     files_on_server = [];
     firstConnect = true;
+
+    isWaiting = false;
 
     constructor() {
         this.request = new Request();
@@ -39,20 +41,25 @@ export class Machinekit {
     }
 
     async getMachineVitals() {
-        const result = await this.request.get("/machinekit/status");
-        if ("errors" in result) {
-            return this.errorHandler(result.errors);
-        }
-        const isSameState = this.controlintervalSpeedAndCompareStates(result);
-        this.state = result;
+        if (!this.isWaiting) {
+            this.isWaiting = true;
+            const result = await this.request.get("/machinekit/status");
 
-        //Only update the page classes if the states are not exactly the same
-        if (!isSameState) {
-            this.buildControllerPage();
+            if ("errors" in result) {
+                return this.errorHandler(result.errors);
+            }
+            const isSameState = await this.controlintervalSpeedAndCompareStates(result);
+            this.state = result;
+
+            //Only update the page classes if the states are not exactly the same
+            if (!isSameState) {
+                this.buildControllerPage();
+            }
+            this.isWaiting = false;
         }
     }
 
-    controlintervalSpeedAndCompareStates(result) {
+    async controlintervalSpeedAndCompareStates(result) {
         //On first connect there is nothing to compare
         if (this.firstConnect) {
             if (this.file_queue.length > 0) {
@@ -86,7 +93,7 @@ export class Machinekit {
                     //Remove last item from the queue
                     this.file_queue.splice(0, 1);
                     //Update the queue on the server
-                    this.request.post("/server/update_file_queue", {
+                    await this.request.post("/server/update_file_queue", {
                         "new_queue": this.file_queue
                     });
                     //Select the first item
@@ -95,9 +102,10 @@ export class Machinekit {
                         file = "";
                     }
                     //Open the first item on the machine
-                    this.request.post("/machinekit/open_file", {
+                    await this.request.post("/machinekit/open_file", {
                         "name": file
                     });
+                    this.renderFileQueue();
                 }
             }
 
@@ -288,10 +296,14 @@ export class Machinekit {
             document.body.className = "server-down";
             return;
         }
-        if (error.status == 403) {
+        if (error.status == 401) {
             this.interval = 50000;
             document.body.className = "not-authorized"
             return;
+        }
+
+        if (error.status == 403) {
+            this.interval = 50000;
         }
 
         this.displayedErrors.push(error.message);
@@ -482,6 +494,14 @@ export class Machinekit {
         if ("errors" in result) {
             return this.errorHandler(result.errors);
         }
+
+        let file = this.file_queue[0];
+        if (!file) {
+            file = "";
+        }
+        await this.request.post("/machinekit/open_file", {
+            "name": file
+        });
         this.buildFileManagerPage();
     }
 

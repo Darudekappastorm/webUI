@@ -29,7 +29,7 @@ class MachinekitController():
             
             self.max_feed_override = self.ini.find("DISPLAY", "MAX_FEED_OVERRIDE")
             self.max_spindle_override = self.ini.find("DISPLAY", "MAX_SPINDLE_OVERRIDE")
-            self.max_velocity = self.s.max_velocity * 60
+            self.max_velocity = self.ini.find("TRAJ", "MAX_VELOCITY")
 
 
     def set_axes(self):
@@ -55,7 +55,6 @@ class MachinekitController():
 
     def interp_state(self):
         """Return current interp state of machine. Ex: INTERP_IDLE"""
-        self.s.poll()
         modes = ["INTERP_IDLE", "INTERP_READING",
             "INTERP_PAUSED", "INTERP_WAITING"]
         state = self.s.interp_state
@@ -144,9 +143,6 @@ class MachinekitController():
     @checkerrors
     def machine_status(self, command):
         """ Toggle power/estop. takes 'estop' or 'power' as command"""
-        if command != "estop" and command != "power":
-            raise ValueError("Unknown command",  400, "ValueError")
-
         self.s.poll()
         if command == "estop":
             if self.s.estop == linuxcnc.STATE_ESTOP:
@@ -233,9 +229,9 @@ class MachinekitController():
         self.s.poll()
         if self.s.task_mode not in (linuxcnc.MODE_AUTO, linuxcnc.MODE_MDI) or self.s.interp_state in (linuxcnc.INTERP_READING, linuxcnc.INTERP_WAITING, linuxcnc.INTERP_PAUSED):
             return {"errors": "Can't start machine because it is currently running or paused in a project"}
+
         self.ensure_mode(linuxcnc.MODE_AUTO)
         self.c.auto(linuxcnc.AUTO_RUN, 0)
-    
         return self.errors()
 
     @checkerrors
@@ -291,21 +287,16 @@ class MachinekitController():
     @checkerrors
     def spindle_brake(self, command):
         """ Engage the spindle brake"""
-        if "brake_engage" not in command and "brake_release" not in command:
-            raise ValueError("unknown command", 400, "ValueError")
-
         self.s.poll()
         brake_command = None
         if "brake_engage" in command:
             brake_command = linuxcnc.BRAKE_ENGAGE
         else:
             brake_command = linuxcnc.BRAKE_RELEASE
+
         if self.s.spindle_brake == brake_command:
             return {"errors": "Command could not be executed because the spindle_brake is already in this state"}
         
-        if self.s.interp_state is not linuxcnc.INTERP_IDLE:
-            return {"errors": "Cannot execute command when machine interp state isn't idle"}
-
         self.ensure_mode(linuxcnc.MODE_MANUAL)
         self.c.brake(brake_command)
 
@@ -314,9 +305,6 @@ class MachinekitController():
     @checkerrors
     def spindle_direction(self, command):
         """ Command takes parameters spindle_forward and spindle_reverse"""
-        if "spindle_forward" not in command and "spindle_reverse" not in command:
-            raise ValueError("unknown command", 400, "ValueError")
-
         self.s.poll() 
         commands = {
             "spindle_forward": linuxcnc.SPINDLE_FORWARD, 
@@ -349,9 +337,6 @@ class MachinekitController():
 
     @checkerrors
     def spindle_enabled(self, command):
-        if "spindle_off" not in command and "spindle_on" not in command:
-            raise ValueError("Unknown command", 400, "ValueError")
-
         commands = {
             "spindle_off": linuxcnc.SPINDLE_OFF,
             "spindle_on": linuxcnc.SPINDLE_CONSTANT
@@ -364,32 +349,24 @@ class MachinekitController():
     @checkerrors
     def spindleoverride(self, value):
         """ Spindle override floatyboii betweem 0 and 1"""
-        if value > 1 or value < 0:
-            return {"errors": "Value outside of limits"}
-
         self.c.spindleoverride(value)
-        self.c.wait_complete()
+        self.c.wait_complete(0.3)
         return self.errors()
 
     @checkerrors
     def maxvel(self, maxvel):
         """ Takes int of maxvel min"""
         self.c.maxvel(maxvel / 60.)
-        self.c.wait_complete()
-
+        self.c.wait_complete(0.3)
         return self.errors()
     
 
     @checkerrors
     def feedoverride(self, value):
-        """ Feed override float between 0 and 1.2"""
-        if value > 1.2 or value < 0:
-            raise ValueError("Value is outside of range. min 0 max 1.2", 400, "ValueError")
-                
-        self.s.poll()
+        """ Feed override float between 0 and 1.2"""   
+        # self.s.poll()
         self.c.feedrate(value)
-        self.c.wait_complete()
-
+        self.c.wait_complete(0.3)
         return self.errors()
 
     @checkerrors
@@ -411,8 +388,6 @@ class MachinekitController():
         self.c.reset_interpreter()
         self.c.wait_complete()
         self.c.program_open(os.path.join(path + "/" + fileName))
-        self.c.wait_complete()
-
         return self.errors()
 
     @checkerrors
