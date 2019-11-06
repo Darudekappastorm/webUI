@@ -25,8 +25,8 @@ export class Machinekit {
 
     isWaiting = false;
 
-    constructor() {
-        this.request = new Request();
+    constructor(ip, port) {
+        this.request = new Request(ip, port);
         this.getFilesFromServer();
         this.controlInterval();
     }

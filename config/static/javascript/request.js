@@ -1,8 +1,9 @@
 export class Request {
-    api = "http://192.168.1.116:5000";
     api_key = "test_secret";
     fetching = false;
-
+    constructor(ip, port) {
+        this.api = "http://" + ip + ":" + port;
+    }
     get(url) {
         return fetch(this.api + url, {
                 method: "GET",

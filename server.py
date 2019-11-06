@@ -46,11 +46,11 @@ def home():
         spindle_override = (
             float(settings.controller.max_spindle_override) * 100)
         max_velocity = (float(settings.controller.max_velocity) * 60)
-    return render_template('/index.html', max_feed_override=feed_override, max_spindle_override=spindle_override, maxvel=max_velocity)
+    return render_template('/index.html', max_feed_override=feed_override, max_spindle_override=spindle_override, maxvel=max_velocity, host=config['server']['host'], port=config['server']['port'])
 
 
 if __name__ == "__main__":
-    app.run('0.0.0.0',
+    app.run(config['server']['host'],
             debug=((config['server'].get('debug')
                     == 'true') if True else False),
             port=config['server']['port'])
