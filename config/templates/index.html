@@ -360,7 +360,7 @@
                 <h3>Upload file</h3>
                 <form onsubmit="event.preventDefault()">
                     <input id="uploadFile" onchange="machinekit.getFileForUpload()" type="file" />
-                    <button onclick="machinekit.uploadFile()">upload</button>
+                    <button onclick="machinekit.uploadFile()" id="file-upload-button">upload</button>
                 </form>
             </div>
 
@@ -397,7 +397,7 @@
                     <tbody id="tbody_queue">
                     </tbody>
                 </table>
-                <button class="primary" onclick="machinekit.updateFileQueueOnServer()">update
+                <button class="primary" id="update-button" onclick="machinekit.updateFileQueueOnServer()">update
                 </button>
             </div>
         </section>

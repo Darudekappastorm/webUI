@@ -79,7 +79,6 @@ def upload():
         file_exists = False
         last_id = 0
 
-        print(files_on_server)
         for item in files_on_server:
             if item[0] == filename:
                 file_exists = True

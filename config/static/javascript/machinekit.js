@@ -462,6 +462,7 @@ export class Machinekit {
     }
 
     async uploadFile() {
+        document.getElementById("file-upload-button").disabled = true;
         if (this.file == null) {
             return this.errorHandler({
                 "message": "Please select a file"
@@ -473,6 +474,7 @@ export class Machinekit {
         const result = await this.request.upload("/server/file_upload",
             formData
         );
+        document.getElementById("file-upload-button").disabled = false;
 
         if ("errors" in result) {
             return this.errorHandler(result.errors);
@@ -484,6 +486,7 @@ export class Machinekit {
     async updateFileQueueOnServer() {
         this.file_queue = [];
         let elements = document.getElementsByClassName("test");
+        document.getElementById("update-button").disabled = true;
 
         for (let i = 0; i < elements.length; i++) {
             this.file_queue.push(elements.item(i).id);
@@ -491,6 +494,9 @@ export class Machinekit {
         const result = await this.request.post("/server/update_file_queue", {
             "new_queue": this.file_queue
         });
+
+        document.getElementById("update-button").disabled = false;
+
         if ("errors" in result) {
             return this.errorHandler(result.errors);
         }
