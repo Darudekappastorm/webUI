@@ -267,7 +267,7 @@
                             <label>Feed override</label>
                             <input type="range" min="0" max="{{max_feed_override}}" value="0" onkeydown="return false;"
                                 onchange="machinekit.controlOverrides(this, '/machinekit/feed')" id="feed-override" />
-                            <span><output id="feed-override-output">120</output>%</span>
+                            <span><output id="feed-override-output">{{max_feed_override}}</output>%</span>
                         </div>
 
                         <div id="spindle-override-control">
@@ -276,7 +276,7 @@
                                 onkeydown="return false;"
                                 onchange="machinekit.controlOverrides(this, '/machinekit/spindle/override')"
                                 id="spindle-override" />
-                            <span><output id="spindle-override-output">100</output>%</span>
+                            <span><output id="spindle-override-output">{{max_spindle_override}}</output>%</span>
                         </div>
 
                         <div id="max-velocity-control">

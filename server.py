@@ -45,7 +45,7 @@ def home():
             float(settings.controller.max_feed_override) * 100)
         spindle_override = (
             float(settings.controller.max_spindle_override) * 100)
-        max_velocity = (float(settings.controller.velocity) * 60)
+        max_velocity = (float(settings.controller.max_velocity) * 60)
     return render_template('/index.html', max_feed_override=feed_override, max_spindle_override=spindle_override, maxvel=max_velocity)
 
 

@@ -105,6 +105,7 @@ export class Machinekit {
                     await this.request.post("/machinekit/open_file", {
                         "name": file
                     });
+                    this.renderFileQueue();
                 }
             }
 
@@ -493,6 +494,14 @@ export class Machinekit {
         if ("errors" in result) {
             return this.errorHandler(result.errors);
         }
+
+        let file = this.file_queue[0];
+        if (!file) {
+            file = "";
+        }
+        await this.request.post("/machinekit/open_file", {
+            "name": file
+        });
         this.buildFileManagerPage();
     }
 

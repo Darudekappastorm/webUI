@@ -29,8 +29,7 @@ class MachinekitController():
             
             self.max_feed_override = self.ini.find("DISPLAY", "MAX_FEED_OVERRIDE")
             self.max_spindle_override = self.ini.find("DISPLAY", "MAX_SPINDLE_OVERRIDE")
-            self.max_velocity = self.s.max_velocity * 60 #decieving name. Is actually current velocity
-            self.velocity = self.ini.find("TRAJ", "MAX_VELOCITY")
+            self.max_velocity = self.ini.find("TRAJ", "MAX_VELOCITY")
 
 
     def set_axes(self):
