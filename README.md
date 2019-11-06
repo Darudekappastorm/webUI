@@ -6,5 +6,5 @@ If you are running this on a beaglebone with machinekit installed then you shoul
 If you want to test the webUI without machinekit installed change the mock setting to true in the default.ini.
 To start the flask API simply navigate to the install folder and type: python server.py
 
-# Mockup
+# Mock
 The mock feature is pretty basic, it contains some errors but it wont simulate real machine behaviour.
