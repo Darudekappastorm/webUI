@@ -160,6 +160,7 @@ class MachinekitController():
                 self.c.state(linuxcnc.STATE_OFF)
             else:
                 self.c.state(linuxcnc.STATE_ON)
+
             self.c.wait_complete()
             return self.errors()
 
