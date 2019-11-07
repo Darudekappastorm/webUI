@@ -5,8 +5,10 @@ pipeline {
     stages {
         stage('build') {
             steps {
-                sh 'python --version'
-                sh 'pip install --user pylint'
+                withEnv(["HOME=${env.WORKSPACE}"]) {
+                    sh 'python --version'
+                    sh 'pip install --user pylint'
+                }
             }
         }
         stage('analysis') {
