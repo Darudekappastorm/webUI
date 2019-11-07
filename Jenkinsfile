@@ -8,6 +8,9 @@ pipeline {
                 withEnv(["HOME=${env.WORKSPACE}"]) {
                     sh 'python --version'
                     sh 'pip install --user pylint'
+                    sh 'pip install --user flask'
+                    sh 'pip install --user flask_cors'
+                    sh 'pip install --user marshmallow'
                 }
             }
         }
