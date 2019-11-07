@@ -18,6 +18,7 @@ with open("./jsonFiles/errorMessages.json") as f:
 @errors
 @validate(SpindleSpeedSchema)
 def set_machinekit_spindle_speed():
+    """Control spindle speed"""
     data = request.sanitizedRequest
     command = escape(data["command"])
     return settings.controller.spindle_speed(command)
@@ -30,6 +31,7 @@ def set_machinekit_spindle_speed():
 @errors
 @validate(SpindleBrakeSchema)
 def set_machinekit_spindle_brake():
+    """Enable/disable spindle brake"""
     data = request.sanitizedRequest
     command = escape(data["command"])
     return settings.controller.spindle_brake(command)
@@ -42,6 +44,7 @@ def set_machinekit_spindle_brake():
 @errors
 @validate(SpindleDirectionSchema)
 def set_machinekit_spindle_direction():
+    """Control spindle direction"""
     data = request.sanitizedRequest
     command = escape(data['command'])
     return settings.controller.spindle_direction(command)
@@ -54,6 +57,7 @@ def set_machinekit_spindle_direction():
 @errors
 @validate(SpindleEnabledSchema)
 def set_spindle_enabled():
+    """Enable/disable spindle"""
     data = request.sanitizedRequest
     command = escape(data["command"])
     return settings.controller.spindle_enabled(command)
@@ -66,5 +70,6 @@ def set_spindle_enabled():
 @errors
 @validate(SpindleOverrideSchema)
 def set_machinekit_spindle_override():
+    """Control spindleoverride"""
     data = request.sanitizedRequest
     return settings.controller.spindleoverride(data["command"])

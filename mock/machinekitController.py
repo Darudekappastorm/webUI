@@ -48,8 +48,8 @@ class linuxcnc():
         """Simulates machinekit stat class"""
         def __init__(self):
             self.axes = 3
-            self.enabled = 1
-            self.estop = linuxcnc.STATE_ESTOP_RESET
+            self.enabled = linuxcnc.STATE_DISABLED
+            self.estop = linuxcnc.STATE_ESTOP
             self.power = linuxcnc.STATE_ENABLED
             self.homed = 1
 
@@ -79,6 +79,7 @@ class linuxcnc():
             return True
 
         def generate_axis(self):
+            """Create fake axes at pos 0 and homed false"""
             i = 0
             axis = {}
 
@@ -137,6 +138,7 @@ class MachinekitController():
         return axes_in_machine
 
     def interp_state(self):
+        """Return machine interp state"""
         self.s.poll()
         modes = [
             "INTERP_IDLE", "INTERP_READING", "INTERP_PAUSED", "INTERP_WAITING"
@@ -145,6 +147,7 @@ class MachinekitController():
         return modes[state - 1]
 
     def task_mode(self):
+        """Return machine task mode"""
         modes = ["MODE_MANUAL", "MODE_AUTO", "MODE_MDI"]
         return modes[self.s.task_mode - 1]
 
@@ -160,7 +163,7 @@ class MachinekitController():
         return self.axes_with_cords
 
     def errors(self):
-        """ Check the machine error channel """
+        """ Read the machine error channel. Dummy function in mock"""
         return {}
 
     def ready_for_mdi_commands(self):
@@ -170,10 +173,12 @@ class MachinekitController():
             self.s.interp_state == linuxcnc.INTERP_IDLE)
 
     def rcs_state(self):
+        """Return machines rcs state"""
         modes = ["RCS_DONE", "RCS_EXEC", "RCS_ERROR"]
         return modes[self.s.state - 1]
 
     def get_all_vitals(self):
+        """Return all vital machine information"""
         self.s.poll()
         return {
             "power": {
@@ -382,6 +387,7 @@ class MachinekitController():
         return True
 
     def running(self, do_poll=True):
+        """Check if machine is running"""
         if do_poll:
             self.s.poll()
         return self.s.task_mode == linuxcnc.MODE_AUTO and self.s.interp_state is not linuxcnc.INTERP_IDLE
@@ -448,6 +454,7 @@ class MachinekitController():
 
     @checkerrors
     def spindle_enabled(self, command):
+        """Enable/disable spindle"""
         commands = {
             "spindle_off": linuxcnc.SPINDLE_OFF,
             "spindle_on": linuxcnc.SPINDLE_CONSTANT
@@ -488,6 +495,7 @@ class MachinekitController():
 
     @checkerrors
     def set_offset(self):
+        """Set machine offset"""
         self.s.poll()
 
         if self.s.interp_state is not linuxcnc.INTERP_IDLE:

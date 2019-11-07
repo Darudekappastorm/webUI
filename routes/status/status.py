@@ -9,8 +9,8 @@ from flask import Blueprint, request, escape
 import configparser
 from schemas.schemas import StatusSchema, FeedOverrideSchema, MaxvelOverrideSchema
 
-config = configparser.ConfigParser()
-config.read("default.ini")
+CONFIG = configparser.ConfigParser()
+CONFIG.read("default.ini")
 status = Blueprint('status', __name__)
 
 with open("./jsonFiles/errorMessages.json") as f:
@@ -23,6 +23,7 @@ with open("./jsonFiles/errorMessages.json") as f:
 @auth
 @errors
 def get_machinekit_status():
+    """Returns machinekit vitals"""
     return settings.controller.get_all_vitals()
 
 
@@ -32,6 +33,7 @@ def get_machinekit_status():
 @auth
 @errors
 def get_machinekit_position():
+    """Returns position of axes"""
     return settings.controller.axes_position()
 
 
@@ -42,6 +44,7 @@ def get_machinekit_position():
 @errors
 @validate(StatusSchema)
 def set_machinekit_status():
+    """Power/Estop control"""
     data = request.sanitizedRequest
     command = escape(data['command'])
     return settings.controller.machine_status(command)
@@ -54,6 +57,7 @@ def set_machinekit_status():
 @errors
 @validate(FeedOverrideSchema)
 def set_machinekit_feedrate():
+    """Control feedrate"""
     data = request.sanitizedRequest
     return settings.controller.feedoverride(data["command"])
 
@@ -63,6 +67,7 @@ def set_machinekit_feedrate():
 @errors
 @validate(MaxvelOverrideSchema)
 def maxvel():
+    """Control maxvel"""
     data = request.sanitizedRequest
     return settings.controller.maxvel(data["command"])
 
@@ -73,11 +78,12 @@ def maxvel():
 @auth
 @errors
 def tool_changer():
-    if config['server']['mock'] == 'true':
+    """Accept toolchange prompt"""
+    if CONFIG['server']['mock'] == 'true':
         return {"success": "Command executed"}
-    else:
-        # Dirty fix to bypass toolchange prompt
-        os.system("halcmd setp hal_manualtoolchange.change_button true")
-        time.sleep(3)
-        os.system("halcmd setp hal_manualtoolchange.change_button false")
-        return {"success": "Command executed"}
+
+    # Dirty fix to bypass toolchange prompt
+    os.system("halcmd setp hal_manualtoolchange.change_button true")
+    time.sleep(3)
+    os.system("halcmd setp hal_manualtoolchange.change_button false")
+    return {"success": "Command executed"}

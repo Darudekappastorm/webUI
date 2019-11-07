@@ -16,12 +16,16 @@ settings.init()
 config = configparser.ConfigParser()
 config.read("default.ini")
 
+global homed
+homed = False
+global mock
+mock = False
 if config['server']['mock'] == 'true':
     from mock.machinekitController import MachinekitController
-
-    print("Starting mock server")
     settings.controller = MachinekitController()
     settings.machinekit_running = True
+    mock = True
+
 else:
     import linuxcnc
     from classes.machinekitController import MachinekitController
@@ -52,10 +56,6 @@ def make_orderer():
 
 ordered, compare = make_orderer()
 unittest.defaultTestLoader.sortTestMethodsUsing = compare
-
-global homed
-homed = False
-
 
 class Startup(TestCase):
 
@@ -101,6 +101,8 @@ class Startup(TestCase):
 
     @ordered
     def test_fail_power_on_while_estop(self):
+        if mock:
+            self.skipTest("Mock doesnt raise this error")
         command = {"command": "power"}
         res = self.client.post(
             '/machinekit/status', headers={"API_KEY": config['security'].get("token"), "Content-Type": "application/json"}, data=json.dumps(command))

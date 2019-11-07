@@ -63,6 +63,7 @@ class MachinekitController():
         return modes[state - 1]
 
     def task_mode(self):
+        """Return machine task mode"""
         modes = ["MODE_MANUAL", "MODE_AUTO", "MODE_MDI"]
         return modes[self.s.task_mode - 1]
 
@@ -370,6 +371,7 @@ class MachinekitController():
 
     @checkerrors
     def spindle_enabled(self, command):
+        """Enable/disable spindle"""
         commands = {
             "spindle_off": linuxcnc.SPINDLE_OFF,
             "spindle_on": linuxcnc.SPINDLE_CONSTANT
@@ -423,6 +425,7 @@ class MachinekitController():
 
     @checkerrors
     def set_offset(self):
+        """Set offset"""
         self.s.poll()
 
         if self.s.interp_state is not linuxcnc.INTERP_IDLE:
