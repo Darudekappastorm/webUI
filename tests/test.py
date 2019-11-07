@@ -220,6 +220,50 @@ class Startup(TestCase):
         self.assert200(res)
 
     @ordered
+    def test_pass_spindle_override(self):
+        i = 0
+        while i < 1:
+            command = {"command": i}
+            res = self.client.post('/machinekit/spindle/override',
+                                  headers={
+                                      "API_KEY": config['security'].get("token"),
+                                      "Content-Type": "application/json"
+                                  },
+                                  data=json.dumps(command))
+            i += 0.1
+            self.assert200(res)
+
+    @ordered
+    def test_pass_feed_override(self):
+        i = 0
+        while i <= 1.2:
+            command = {"command": i}
+            res = self.client.post('/machinekit/feed',
+                                   headers={
+                                       "API_KEY":
+                                       config['security'].get("token"),
+                                       "Content-Type": "application/json"
+                                   },
+                                   data=json.dumps(command))
+            i += 0.1
+            self.assert200(res)
+
+    @ordered
+    def test_pass_maxvel_override(self):
+        i = 0
+        while i <= 3000:
+            command = {"command": i}
+            res = self.client.post('/machinekit/maxvel',
+                                   headers={
+                                       "API_KEY":
+                                       config['security'].get("token"),
+                                       "Content-Type": "application/json"
+                                   },
+                                   data=json.dumps(command))
+            i += 300
+            self.assert200(res)
+
+    @ordered
     def test_pass_enable_estop(self):
         command = {"command": "estop"}
         res = self.client.post(
