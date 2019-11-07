@@ -18,3 +18,7 @@ Set the host and port to your liking in the .ini file.
 
 If you are all set start the server with: python server.py
 
+# Unit tests
+To successfully run the unit tests make sure to either have mock set to true or have linuxcnc running. 
+run the unit tests with the following command:
+- python -m unittests/test

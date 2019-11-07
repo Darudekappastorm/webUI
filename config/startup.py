@@ -1,7 +1,4 @@
-import settings
-import configparser
-import sys
-from flask import Flask, render_template
+from flask import Flask
 from flask_cors import CORS
 
 from routes.axes.axes import axes
@@ -9,9 +6,6 @@ from routes.status.status import status
 from routes.program.program import program
 from routes.spindle.spindle import spindle
 from routes.files.files import files
-
-config = configparser.ConfigParser()
-config.read("default.ini")
 
 
 def app():
