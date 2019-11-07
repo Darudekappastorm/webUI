@@ -17,21 +17,27 @@ with open("./jsonFiles/errorMessages.json") as f:
     errorMessages = json.load(f)
 
 
-@status.route("/machinekit/status", endpoint='get_machine_status', methods=["GET"])
+@status.route("/machinekit/status",
+              endpoint='get_machine_status',
+              methods=["GET"])
 @auth
 @errors
 def get_machinekit_status():
     return settings.controller.get_all_vitals()
 
 
-@status.route("/machinekit/position", endpoint='get_machinekit_position', methods=["GET"])
+@status.route("/machinekit/position",
+              endpoint='get_machinekit_position',
+              methods=["GET"])
 @auth
 @errors
 def get_machinekit_position():
     return settings.controller.axes_position()
 
 
-@status.route("/machinekit/status", endpoint='set_machinekit_status', methods=["POST"])
+@status.route("/machinekit/status",
+              endpoint='set_machinekit_status',
+              methods=["POST"])
 @auth
 @errors
 @validate(StatusSchema)
@@ -41,7 +47,9 @@ def set_machinekit_status():
     return settings.controller.machine_status(command)
 
 
-@status.route("/machinekit/feed", endpoint='set_machinekit_feedrate', methods=["POST"])
+@status.route("/machinekit/feed",
+              endpoint='set_machinekit_feedrate',
+              methods=["POST"])
 @auth
 @errors
 @validate(FeedOverrideSchema)
@@ -59,7 +67,9 @@ def maxvel():
     return settings.controller.maxvel(data["command"])
 
 
-@status.route("/machinekit/toolchange", endpoint='tool_changer', methods=["GET"])
+@status.route("/machinekit/toolchange",
+              endpoint='tool_changer',
+              methods=["GET"])
 @auth
 @errors
 def tool_changer():

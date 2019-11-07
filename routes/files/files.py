@@ -34,10 +34,14 @@ def return_files():
 
         return {"result": files_on_server, "file_queue": settings.file_queue}
     except Exception as e:
-        return {"errors": errorMessages['internal-server-error']}, errorMessages['internal-server-error']['status']
+        return {
+            "errors": errorMessages['internal-server-error']
+        }, errorMessages['internal-server-error']['status']
 
 
-@files.route("/server/update_file_queue", endpoint='update_file_queue', methods=["POST"])
+@files.route("/server/update_file_queue",
+             endpoint='update_file_queue',
+             methods=["POST"])
 @auth
 @errors
 @validate(UpdateQueueSchema)
@@ -47,9 +51,11 @@ def update_file_queue():
     new_queue = data["new_queue"]
 
     for item in new_queue:
-        if not os.path.isfile(config['storage']['upload_folder'] + "/" + escape(item)):
-            raise NameError(
-                errorMessages['file-not-found']['message'], errorMessages['file-not-found']['status'], errorMessages['file-not-found']['type'])
+        if not os.path.isfile(config['storage']['upload_folder'] + "/" +
+                              escape(item)):
+            raise NameError(errorMessages['file-not-found']['message'],
+                            errorMessages['file-not-found']['status'],
+                            errorMessages['file-not-found']['type'])
 
     settings.file_queue = new_queue
     return {"success": settings.file_queue}
@@ -62,7 +68,8 @@ def update_file_queue():
 def open_file():
     """ Open a file """
     data = request.sanitizedRequest
-    return settings.controller.open_file(config['storage']['upload_folder'], escape(data["name"]))
+    return settings.controller.open_file(config['storage']['upload_folder'],
+                                         escape(data["name"]))
 
 
 @files.route("/server/file_upload", endpoint='upload', methods=["POST"])
@@ -71,8 +78,9 @@ def upload():
     """ Upload a nc, ngc, gcode file to the server """
     try:
         if "file" not in request.files:
-            raise ValueError(
-                errorMessages['file-not-found']['message'], errorMessages['file-not-found']['status'], errorMessages['file-not-found']['type'])
+            raise ValueError(errorMessages['file-not-found']['message'],
+                             errorMessages['file-not-found']['status'],
+                             errorMessages['file-not-found']['type'])
 
         file = request.files["file"]
         filename = secure_filename(file.filename)
@@ -85,25 +93,36 @@ def upload():
                 break
 
         if file_exists:
-            raise ValueError(
-                errorMessages['file-exists']['message'], errorMessages['file-exists']['status'], errorMessages['file-exists']['type'])
+            raise ValueError(errorMessages['file-exists']['message'],
+                             errorMessages['file-exists']['status'],
+                             errorMessages['file-exists']['type'])
 
         with open('./routes/files/files.csv', "a") as csvfile:
             fieldnames = ['name', 'path']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow(
-                {'name': filename, 'path': config['storage']['upload_folder']})
+            writer.writerow({
+                'name': filename,
+                'path': config['storage']['upload_folder']
+            })
 
-        file.save(os.path.join(config['storage']
-                               ['upload_folder'] + "/" + filename))
+        file.save(
+            os.path.join(config['storage']['upload_folder'] + "/" + filename))
 
         return {"success": "file added"}, 201
     except ValueError as e:
         message, status, errType = e
-        return {"errors": {"message": message, "status": status, "type": errType}}, status
+        return {
+            "errors": {
+                "message": message,
+                "status": status,
+                "type": errType
+            }
+        }, status
     except Exception as e:
         print(e)
-        return {"errors": errorMessages['internal-server-error']}, errorMessages['internal-server-error']['status']
+        return {
+            "errors": errorMessages['internal-server-error']
+        }, errorMessages['internal-server-error']['status']
 
 
 @files.route("/machinekit/halcmd", endpoint='halcmd', methods=["POST"])

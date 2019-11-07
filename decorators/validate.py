@@ -16,4 +16,5 @@ def validate(schema):
             return f(*args, **kwargs)
 
         return validateWrapper
+
     return realDecorator

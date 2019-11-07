@@ -12,7 +12,9 @@ with open("./jsonFiles/errorMessages.json") as f:
     errorMessages = json.load(f)
 
 
-@program.route("/machinekit/program", endpoint='control_program', methods=["POST"])
+@program.route("/machinekit/program",
+               endpoint='control_program',
+               methods=["POST"])
 @auth
 @errors
 @validate(ProgramSchema)
