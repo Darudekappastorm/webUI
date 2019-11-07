@@ -1,47 +1,47 @@
 import json
 import configparser
 from flask import request
-config = configparser.ConfigParser()
-config.read("default.ini")
+CONFIG = configparser.ConfigParser()
+CONFIG.read("default.ini")
 
 with open("./jsonFiles/errorMessages.json") as f:
-    message = json.load(f)
+    MESSAGE = json.load(f)
 
-whiteList = config.get("security", "whitelisted").split(",")
-blackList = config.get("security", "blackList").split(",")
-ip_auth_enabled = (config['security'].get('ip_authentication_enabled') ==
+WHITELIST = CONFIG.get("security", "whitelisted").split(",")
+BLACKLIST = CONFIG.get("security", "blackList").split(",")
+IP_AUTH_ENABLED = (CONFIG['security'].get('ip_authentication_enabled') ==
                    'true') if True else False
 
 
-def auth(f):
+def auth(func):
     """ Decorator that checks if the machine returned any errors."""
     def wrapper(*args, **kwargs):
-        if ip_auth_enabled:
+        if IP_AUTH_ENABLED:
             ip = request.remote_addr
-            if ip in blackList:
+            if ip in BLACKLIST:
                 return {
-                    "errors": message['whitelist-error']
-                }, message['whitelist-error']['status']
+                    "errors": MESSAGE['whitelist-error']
+                }, MESSAGE['whitelist-error']['status']
 
             if request.method in ["POST", "UPDATE", "PUT"]:
-                if (ip not in whiteList):
+                if ip not in WHITELIST:
                     return {
-                        "errors": message['whitelist-error']
-                    }, message['whitelist-error']['status']
+                        "errors": MESSAGE['whitelist-error']
+                    }, MESSAGE['whitelist-error']['status']
 
         headers = request.headers
         if not "API_KEY" in headers:
             return {
-                "errors": message['authorization']
-            }, message['authorization']['status']
+                "errors": MESSAGE['authorization']
+            }, MESSAGE['authorization']['status']
 
-        auth = headers.get("API_KEY")
-        if auth != config['security']['token']:
+        authentication = headers.get("API_KEY")
+        if authentication != CONFIG['security']['token']:
             return {
-                "errors": message['authorization']
-            }, message['authorization']['status']
+                "errors": MESSAGE['authorization']
+            }, MESSAGE['authorization']['status']
 
-        return f(*args, **kwargs)
+        return func(*args, **kwargs)
 
-    wrapper.__name__ = f.__name__
+    wrapper.__name__ = func.__name__
     return wrapper

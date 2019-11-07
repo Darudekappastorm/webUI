@@ -3,9 +3,10 @@ from marshmallow import ValidationError
 
 
 def validate(schema):
-    def realDecorator(f):
-        def validateWrapper(*args, **kwargs):
-            """ """
+    """Validates a marshmallow schema"""
+    def real_decorator(func):
+        def validate_wrapper(*args, **kwargs):
+            """Validate marshmallow schema"""
             req = request.json
             errors = schema().load(req)
 
@@ -13,8 +14,8 @@ def validate(schema):
                 raise ValidationError(errors.errors)
 
             request.sanitizedRequest = errors.data
-            return f(*args, **kwargs)
+            return func(*args, **kwargs)
 
-        return validateWrapper
+        return validate_wrapper
 
-    return realDecorator
+    return real_decorator
