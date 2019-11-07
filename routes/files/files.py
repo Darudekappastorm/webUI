@@ -8,13 +8,15 @@ from decorators.validate import validate
 from flask import Blueprint, request, escape
 from schemas.schemas import UpdateQueueSchema, OpenFileSchema, HalcmdSchema
 from werkzeug.utils import secure_filename
+import csv
 
 config = configparser.ConfigParser()
 config.read("default.ini")
 files = Blueprint('files', __name__)
-
 with open("./jsonFiles/errorMessages.json") as f:
     errorMessages = json.load(f)
+
+files_on_server = []
 
 
 @files.route("/server/files", endpoint='return_files', methods=["GET"])
@@ -23,12 +25,14 @@ with open("./jsonFiles/errorMessages.json") as f:
 def return_files():
     """ Return all machinekit files from the server """
     try:
-        cur = settings.mysql.connection.cursor()
-        cur.execute("""
-                    SELECT * FROM files
-                    """)
-        result = cur.fetchall()
-        return {"result": result, "file_queue": settings.file_queue}
+        global files_on_server
+        files_on_server = []
+        with open("./routes/files/files.csv") as csv_file:
+            reader = csv.DictReader(csv_file)
+            for row in reader:
+                files_on_server.append([row['name'], row['path']])
+
+        return {"result": files_on_server, "file_queue": settings.file_queue}
     except Exception as e:
         return {"errors": errorMessages['internal-server-error']}, errorMessages['internal-server-error']['status']
 
@@ -72,32 +76,33 @@ def upload():
 
         file = request.files["file"]
         filename = secure_filename(file.filename)
+        file_exists = False
+        last_id = 0
 
-        cur = settings.mysql.connection.cursor()
-        cur.execute(
-            """
-            SELECT * FROM files
-            WHERE file_name = '%s' """ % filename)
+        for item in files_on_server:
+            if item[0] == filename:
+                file_exists = True
+                break
 
-        result = cur.fetchall()
-
-        if len(result) > 0:
+        if file_exists:
             raise ValueError(
                 errorMessages['file-exists']['message'], errorMessages['file-exists']['status'], errorMessages['file-exists']['type'])
 
-        cur.execute("""
-            INSERT INTO files (file_name, file_location)
-            VALUES (%s, %s)
-            """, (filename, config['storage']['upload_folder'])
-        )
-        settings.mysql.connection.commit()
+        with open('./routes/files/files.csv', "a") as csvfile:
+            fieldnames = ['name', 'path']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writerow(
+                {'name': filename, 'path': config['storage']['upload_folder']})
+
         file.save(os.path.join(config['storage']
                                ['upload_folder'] + "/" + filename))
-        return {"success": "file added"}
+
+        return {"success": "file added"}, 201
     except ValueError as e:
         message, status, errType = e
         return {"errors": {"message": message, "status": status, "type": errType}}, status
     except Exception as e:
+        print(e)
         return {"errors": errorMessages['internal-server-error']}, errorMessages['internal-server-error']['status']
 
 

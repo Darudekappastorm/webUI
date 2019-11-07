@@ -9,14 +9,11 @@ import math
 
 app = app()
 settings.init()
-settings.mysql = app.mysql
 config = configparser.ConfigParser()
 config.read("default.ini")
 
 if config['server']['mock'] == 'true':
     from mock.machinekitController import MachinekitController
-
-    print("Starting mock server")
     settings.controller = MachinekitController()
     settings.machinekit_running = True
 else:
@@ -40,17 +37,17 @@ def home():
     feed_override = 120
     spindle_override = 100
     max_velocity = 3200
-    if config["server"]["mock"] == 'false':
+    if config["server"]["mock"] == 'false' and settings.machinekit_running:
         feed_override = (
             float(settings.controller.max_feed_override) * 100)
         spindle_override = (
             float(settings.controller.max_spindle_override) * 100)
         max_velocity = (float(settings.controller.max_velocity) * 60)
-    return render_template('/index.html', max_feed_override=feed_override, max_spindle_override=spindle_override, maxvel=max_velocity)
+    return render_template('/index.html', max_feed_override=feed_override, max_spindle_override=spindle_override, maxvel=max_velocity, host=config['server']['host'], port=config['server']['port'])
 
 
 if __name__ == "__main__":
-    app.run('0.0.0.0',
+    app.run(config['server']['host'],
             debug=((config['server'].get('debug')
                     == 'true') if True else False),
             port=config['server']['port'])
