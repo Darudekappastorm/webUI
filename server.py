@@ -9,10 +9,10 @@ import math
 
 app = app()
 settings.init()
-config = configparser.ConfigParser()
-config.read("default.ini")
+CONFIG = configparser.ConfigParser()
+CONFIG.read("default.ini")
 
-if config['server']['mock'] == 'true':
+if CONFIG['server']['mock'] == 'true':
     from mock.machinekitController import MachinekitController
     settings.controller = MachinekitController()
     settings.machinekit_running = True
@@ -22,14 +22,14 @@ else:
 
     try:
         settings.controller = MachinekitController(
-            config["server"]["axis_config"])
+            CONFIG["server"]["axis_config"])
         settings.machinekit_running = True
-    except (linuxcnc.error) as e:
+    except (linuxcnc.error) as err:
         print(
             "Machinekit is down please start machinekit and then restart the server"
         )
-    except Exception as e:
-        sys.exit({"errors": [e]})
+    except Exception as err:
+        sys.exit({"errors": [err]})
 
 
 @app.route("/", methods=['GET'])
@@ -38,7 +38,7 @@ def home():
     feed_override = 120
     spindle_override = 100
     max_velocity = 3200
-    if config["server"]["mock"] == 'false' and settings.machinekit_running:
+    if not CONFIG["server"]["mock"] and settings.machinekit_running:
         feed_override = (float(settings.controller.max_feed_override) * 100)
         spindle_override = (float(settings.controller.max_spindle_override) *
                             100)
@@ -47,12 +47,12 @@ def home():
                            max_feed_override=feed_override,
                            max_spindle_override=spindle_override,
                            maxvel=max_velocity,
-                           host=config['server']['host'],
-                           port=config['server']['port'])
+                           host=CONFIG['server']['host'],
+                           port=CONFIG['server']['port'])
 
 
 if __name__ == "__main__":
     app.run(
-        config['server']['host'],
-        debug=((config['server'].get('debug') == 'true') if True else False),
-        port=config['server']['port'])
+        CONFIG['server']['host'],
+        debug=((CONFIG['server'].get('debug') == 'true') if True else False),
+        port=CONFIG['server']['port'])

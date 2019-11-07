@@ -1,30 +1,27 @@
-from flask import request
 import json
-import configparser
 import settings
 import werkzeug
 from marshmallow import ValidationError
+from flask import request
 
-config = configparser.ConfigParser()
-config.read("default.ini")
 with open("./jsonFiles/errorMessages.json") as f:
-    errorMessages = json.load(f)
+    MESSAGE = json.load(f)
 
 
-def errors(f):
-    def errorWrapper(*args, **kwargs):
+def errors(func):
+    """Decorator that wraps function in try/catch and handles all exceptions"""
+    def error_wrapper(*args, **kwargs):
         try:
             if request.method == "POST":
                 if not request.json:
-                    raise ValueError(
-                        errorMessages['content-not-allowed']['message'],
-                        errorMessages['content-not-allowed']['status'],
-                        errorMessages['content-not-allowed']['type'])
-            if settings.machinekit_running == False:
-                raise RuntimeError(errorMessages['machinekit-down']['message'],
-                                   errorMessages['machinekit-down']['status'],
-                                   errorMessages['machinekit-down']['type'])
-            return f(*args, **kwargs)
+                    raise ValueError(MESSAGE['content-not-allowed']['message'],
+                                     MESSAGE['content-not-allowed']['status'],
+                                     MESSAGE['content-not-allowed']['type'])
+            if not settings.machinekit_running:
+                raise RuntimeError(MESSAGE['machinekit-down']['message'],
+                                   MESSAGE['machinekit-down']['status'],
+                                   MESSAGE['machinekit-down']['type'])
+            return func(*args, **kwargs)
 
         except ValidationError as err:
             return {
@@ -34,8 +31,8 @@ def errors(f):
                     "type": "ValidationError"
                 }
             }, 400
-        except ValueError as e:
-            message, status, errType = e
+        except ValueError as err:
+            message, status, errType = err
             return {
                 "errors": {
                     "message": message,
@@ -43,8 +40,8 @@ def errors(f):
                     "type": errType
                 }
             }, status
-        except RuntimeError as e:
-            message, status, errType = e
+        except RuntimeError as err:
+            message, status, errType = err
             return {
                 "errors": {
                     "message": message,
@@ -52,8 +49,8 @@ def errors(f):
                     "type": errType
                 }
             }, status
-        except NameError as e:
-            message, status, errType = e
+        except NameError as err:
+            message, status, errType = err
             return {
                 "errors": {
                     "message": message,
@@ -61,17 +58,17 @@ def errors(f):
                     "type": errType
                 }
             }, status
-        except (werkzeug.exceptions.BadRequest) as e:
-            message, status, errType = errorMessages['invalid-content']
+        except (werkzeug.exceptions.BadRequest) as err:
+            message, status, errType = MESSAGE['invalid-content']
             return {
                 "errors": {
-                    "message": errorMessages['invalid-content']['message'],
-                    "status": errorMessages['invalid-content']['status'],
-                    "type": errorMessages['invalid-content']['type']
+                    "message": MESSAGE['invalid-content']['message'],
+                    "status": MESSAGE['invalid-content']['status'],
+                    "type": MESSAGE['invalid-content']['type']
                 }
-            }, errorMessages['invalid-content']['status']
-        except Exception as e:
-            return {"errors": {"message": e.message}}, 500
+            }, MESSAGE['invalid-content']['status']
+        except Exception as err:
+            return {"errors": {"message": err.message}}, 500
 
-    errorWrapper.__name__ = f.__name__
-    return errorWrapper
+    error_wrapper.__name__ = func.__name__
+    return error_wrapper

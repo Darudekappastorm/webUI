@@ -1,7 +1,5 @@
-import settings
 import configparser
-import sys
-from flask import Flask, render_template
+from flask import Flask
 from flask_cors import CORS
 
 from routes.axes.axes import axes

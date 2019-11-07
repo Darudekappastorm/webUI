@@ -14,7 +14,7 @@ config = configparser.ConfigParser()
 config.read("default.ini")
 files = Blueprint('files', __name__)
 with open("./jsonFiles/errorMessages.json") as f:
-    errorMessages = json.load(f)
+    MESSAGE = json.load(f)
 
 files_on_server = []
 
@@ -35,8 +35,8 @@ def return_files():
         return {"result": files_on_server, "file_queue": settings.file_queue}
     except Exception as e:
         return {
-            "errors": errorMessages['internal-server-error']
-        }, errorMessages['internal-server-error']['status']
+            "errors": MESSAGE['internal-server-error']
+        }, MESSAGE['internal-server-error']['status']
 
 
 @files.route("/server/update_file_queue",
@@ -53,9 +53,9 @@ def update_file_queue():
     for item in new_queue:
         if not os.path.isfile(config['storage']['upload_folder'] + "/" +
                               escape(item)):
-            raise NameError(errorMessages['file-not-found']['message'],
-                            errorMessages['file-not-found']['status'],
-                            errorMessages['file-not-found']['type'])
+            raise NameError(MESSAGE['file-not-found']['message'],
+                            MESSAGE['file-not-found']['status'],
+                            MESSAGE['file-not-found']['type'])
 
     settings.file_queue = new_queue
     return {"success": settings.file_queue}
@@ -78,9 +78,9 @@ def upload():
     """ Upload a nc, ngc, gcode file to the server """
     try:
         if "file" not in request.files:
-            raise ValueError(errorMessages['file-not-found']['message'],
-                             errorMessages['file-not-found']['status'],
-                             errorMessages['file-not-found']['type'])
+            raise ValueError(MESSAGE['file-not-found']['message'],
+                             MESSAGE['file-not-found']['status'],
+                             MESSAGE['file-not-found']['type'])
 
         file = request.files["file"]
         filename = secure_filename(file.filename)
@@ -93,9 +93,9 @@ def upload():
                 break
 
         if file_exists:
-            raise ValueError(errorMessages['file-exists']['message'],
-                             errorMessages['file-exists']['status'],
-                             errorMessages['file-exists']['type'])
+            raise ValueError(MESSAGE['file-exists']['message'],
+                             MESSAGE['file-exists']['status'],
+                             MESSAGE['file-exists']['type'])
 
         with open('./routes/files/files.csv', "a") as csvfile:
             fieldnames = ['name', 'path']
@@ -121,8 +121,8 @@ def upload():
     except Exception as e:
         print(e)
         return {
-            "errors": errorMessages['internal-server-error']
-        }, errorMessages['internal-server-error']['status']
+            "errors": MESSAGE['internal-server-error']
+        }, MESSAGE['internal-server-error']['status']
 
 
 @files.route("/machinekit/halcmd", endpoint='halcmd', methods=["POST"])

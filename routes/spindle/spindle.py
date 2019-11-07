@@ -8,7 +8,7 @@ from decorators.validate import validate
 spindle = Blueprint('spindle', __name__)
 
 with open("./jsonFiles/errorMessages.json") as f:
-    errorMessages = json.load(f)
+    MESSAGE = json.load(f)
 
 
 @spindle.route("/machinekit/spindle/speed",

@@ -14,7 +14,7 @@ config.read("default.ini")
 status = Blueprint('status', __name__)
 
 with open("./jsonFiles/errorMessages.json") as f:
-    errorMessages = json.load(f)
+    MESSAGE = json.load(f)
 
 
 @status.route("/machinekit/status",

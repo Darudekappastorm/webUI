@@ -9,7 +9,7 @@ from schemas.schemas import HomeSchema, CommandSchema, ManualControlSchema
 
 axes = Blueprint('axes', __name__)
 with open("./jsonFiles/errorMessages.json") as f:
-    errorMessages = json.load(f)
+    MESSAGE = json.load(f)
 
 
 ##

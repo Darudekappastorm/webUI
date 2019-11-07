@@ -9,7 +9,7 @@ from decorators.validate import validate
 program = Blueprint('program', __name__)
 
 with open("./jsonFiles/errorMessages.json") as f:
-    errorMessages = json.load(f)
+    MESSAGE = json.load(f)
 
 
 @program.route("/machinekit/program",
