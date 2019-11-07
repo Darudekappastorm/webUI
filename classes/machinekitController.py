@@ -1,13 +1,13 @@
 #!/usr/bin/python
-import linuxcnc
-import sys
 import os
+import sys
+import linuxcnc
 
 
-def checkerrors(f):
+def checkerrors(func):
     """ Decorator that checks if the machine returned any errors."""
     def wrapper(*args, **kwargs):
-        errors = f(*args, **kwargs)
+        errors = func(*args, **kwargs)
         if 'errors' in errors:
             raise RuntimeError(errors['errors'], 502, "RuntimeError")
         else:
@@ -23,20 +23,20 @@ class MachinekitController():
         self.s = linuxcnc.stat()
         self.c = linuxcnc.command()
         self.e = linuxcnc.error_channel()
+
         self.axes = self.set_axes()
         self.axes_with_cords = {}
         self.ini = linuxcnc.ini(ini)
-        self.errorList = []
+        self.error_list = []
 
         self.max_feed_override = self.ini.find("DISPLAY", "MAX_FEED_OVERRIDE")
-        self.max_spindle_override = self.ini.find("DISPLAY",
-                                                  "MAX_SPINDLE_OVERRIDE")
+        self.max_spindle_override = self.ini.find("DISPLAY", "MAX_SPINDLE_OVERRIDE")
         self.max_velocity = self.ini.find("TRAJ", "MAX_VELOCITY")
 
     def set_axes(self):
         """Turn axe numbers into alphabetic values"""
         self.s.poll()
-        axesDict = {
+        axes_dict = {
             0: "x",
             1: "y",
             2: "z",
@@ -48,11 +48,11 @@ class MachinekitController():
             8: "w",
         }
         i = 0
-        axesInMachine = []
+        axes_in_machine = []
         while i < self.s.axes:
-            axesInMachine.append(axesDict[i])
+            axes_in_machine.append(axes_dict[i])
             i += 1
-        return axesInMachine
+        return axes_in_machine
 
     def interp_state(self):
         """Return current interp state of machine. Ex: INTERP_IDLE"""
@@ -88,10 +88,10 @@ class MachinekitController():
                 typus, text
 
         if error is not None:
-            if len(self.errorList) >= 50:
-                self.errorList = []
+            if len(self.error_list) >= 50:
+                self.error_list = []
 
-            self.errorList.append(error[1])
+            self.error_list.append(error[1])
             return {"errors": error[1]}
         else:
             return {}
@@ -155,8 +155,7 @@ class MachinekitController():
 
             self.c.wait_complete()
             return self.errors()
-
-        if command == "power":
+        else:
             if self.s.estop == linuxcnc.STATE_ESTOP:
                 return {
                     "errors":
@@ -403,7 +402,7 @@ class MachinekitController():
         return self.errors()
 
     @checkerrors
-    def open_file(self, path, fileName):
+    def open_file(self, path, file_name):
         """ Open file in the /files dir on the beagleboi """
         self.s.poll()
 
@@ -412,14 +411,14 @@ class MachinekitController():
 
         self.ensure_mode(linuxcnc.MODE_MDI)
 
-        if not fileName:
+        if not file_name:
             self.c.reset_interpreter()
             self.c.wait_complete()
             return self.errors()
 
         self.c.reset_interpreter()
         self.c.wait_complete()
-        self.c.program_open(os.path.join(path + "/" + fileName))
+        self.c.program_open(os.path.join(path + "/" + file_name))
         return self.errors()
 
     @checkerrors

@@ -32,34 +32,34 @@ def errors(func):
                 }
             }, 400
         except ValueError as err:
-            message, status, errType = err
+            message, status, err_type = err
             return {
                 "errors": {
                     "message": message,
                     "status": status,
-                    "type": errType
+                    "type": err_type
                 }
             }, status
         except RuntimeError as err:
-            message, status, errType = err
+            message, status, err_type = err
             return {
                 "errors": {
                     "message": message,
                     "status": status,
-                    "type": errType
+                    "type": err_type
                 }
             }, status
         except NameError as err:
-            message, status, errType = err
+            message, status, err_type = err
             return {
                 "errors": {
                     "message": message,
                     "status": status,
-                    "type": errType
+                    "type": err_type
                 }
             }, status
         except (werkzeug.exceptions.BadRequest) as err:
-            message, status, errType = MESSAGE['invalid-content']
+            message, status, err_type = MESSAGE['invalid-content']
             return {
                 "errors": {
                     "message": MESSAGE['invalid-content']['message'],

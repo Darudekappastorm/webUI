@@ -1,11 +1,8 @@
 import sys
-import json
-import settings
 import configparser
+import settings
 from flask import render_template
-from marshmallow import Schema
 from config.startup import app
-import math
 
 app = app()
 settings.init()

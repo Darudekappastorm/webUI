@@ -1,8 +1,8 @@
 #!/usr/bin/python
-def checkerrors(f):
+def checkerrors(func):
     """ Decorator that checks if the machine returned any errors."""
     def wrapper(*args, **kwargs):
-        errors = f(*args, **kwargs)
+        errors = func(*args, **kwargs)
         if 'errors' in errors:
             raise RuntimeError(errors['errors'], 502, "RuntimeError")
         else:
@@ -12,6 +12,8 @@ def checkerrors(f):
 
 
 class linuxcnc():
+    """The Machinekit mock class"""
+
     INTERP_IDLE = 1
     INTERP_READING = 2
     INTERP_PAUSED = 3
@@ -42,7 +44,8 @@ class linuxcnc():
     BRAKE_ENGAGE = 1
     BRAKE_RELEASE = 0
 
-    class stat():
+    class Stat():
+        """Simulates machinekit stat class"""
         def __init__(self):
             self.axes = 3
             self.enabled = 1
@@ -54,7 +57,7 @@ class linuxcnc():
             self.state = linuxcnc.RCS_DONE
 
             self.task_mode = linuxcnc.MODE_MDI
-            self.axis = self.generateAxis()
+            self.axis = self.generate_axis()
 
             self.spindle_speed = 0
             self.spindle_enabled = 1
@@ -75,7 +78,7 @@ class linuxcnc():
         def poll(self):
             return True
 
-        def generateAxis(self):
+        def generate_axis(self):
             i = 0
             axis = {}
 
@@ -84,16 +87,18 @@ class linuxcnc():
                 i += 1
             return axis
 
-    class command():
+    class Command():
+        """Simulates machinekit command class"""
         def __init__(self):
             """"""
         def wait_complete(self):
             return True
 
-        def state(self, command):
+        def state(self):
             return
 
-    class error_channel():
+    class ErrorChannel():
+        """Simulates machinekit error class"""
         def __init__(self):
             """"""
         def poll(self):
@@ -103,16 +108,17 @@ class linuxcnc():
 class MachinekitController():
     """ The Machinekit python interface in a class """
     def __init__(self):
-        self.s = linuxcnc.stat()
-        self.c = linuxcnc.command()
-        self.e = linuxcnc.error_channel()
+        self.s = linuxcnc.Stat()
+        self.c = linuxcnc.Command()
+        self.e = linuxcnc.ErrorChannel()
         self.axes = self.set_axes()
         self.axes_with_cords = {}
 
     # Class is split up in getters and setters
 
     def set_axes(self):
-        axesDict = {
+        """Give the axes in the machine a letter"""
+        axes_dict = {
             0: "x",
             1: "y",
             2: "z",
@@ -124,11 +130,11 @@ class MachinekitController():
             8: "w",
         }
         i = 0
-        axesInMachine = []
+        axes_in_machine = []
         while i < self.s.axes:
-            axesInMachine.append(axesDict[i])
+            axes_in_machine.append(axes_dict[i])
             i += 1
-        return axesInMachine
+        return axes_in_machine
 
     def interp_state(self):
         self.s.poll()
@@ -212,8 +218,7 @@ class MachinekitController():
 
             self.c.wait_complete()
             return self.errors()
-
-        if command == "power":
+        else:
             if self.s.estop == linuxcnc.STATE_ESTOP:
                 return {
                     "errors":
@@ -241,20 +246,19 @@ class MachinekitController():
 
         i = 0
         axe = 1
-        lastMatch = 0
-        values = []
+        last_match = 0
 
         for letter in command:
             i += 1
             if letter == "X" or letter == "Y" or letter == "Z":
                 #set last found element to i
-                if lastMatch is not 0:
+                if last_match is not 0:
                     self.s.axis[axe - 2]['pos'] = float(
-                        command[lastMatch:i - 1].replace(" ", ""))
+                        command[last_match:i - 1].replace(" ", ""))
                     if axe == 3:
                         self.s.axis[axe - 1]['pos'] = float(
                             command[i:len(command)])
-                lastMatch = i
+                last_match = i
                 axe += 1
 
         return self.errors()
@@ -310,7 +314,7 @@ class MachinekitController():
             return {"success": "Command executed"}
 
     @checkerrors
-    def task_run(self, start_line):
+    def task_run(self, start_line=0):
         """ Run program from line """
         self.s.poll()
         if self.s.task_mode not in (
@@ -323,8 +327,6 @@ class MachinekitController():
                 "Can't start machine because it is currently running or paused in a project"
             }
         self.ensure_mode(linuxcnc.MODE_AUTO)
-        self.c.auto(linuxcnc.AUTO_RUN, 9)
-
         return self.errors()
 
     @checkerrors
@@ -342,7 +344,6 @@ class MachinekitController():
                 "Machine not ready to recieve pause command. Probably because its currently not working on a program"
             }
         self.ensure_mode(linuxcnc.MODE_AUTO)
-        self.c.auto(linuxcnc.AUTO_PAUSE)
 
         return self.errors()
 
@@ -358,7 +359,6 @@ class MachinekitController():
                 "Machine not ready to resume. Probably because the machine is not paused or not in auto modus"
             }
         self.ensure_mode(linuxcnc.MODE_AUTO)
-        self.c.auto(linuxcnc.AUTO_RESUME)
 
         return self.errors()
 
