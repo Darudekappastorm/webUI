@@ -16,9 +16,12 @@ CONFIG.read("default.ini")
 
 global homed
 global mock
+global estop
 
+estop = True
 homed = False
 mock = False
+
 if CONFIG['server']['mock'] == 'true':
     from mock.machinekitController import MachinekitController
     settings.controller = MachinekitController()
@@ -75,11 +78,15 @@ class Startup(TestCase):
     @ordered
     def test_pass_authorization(self):
         """Test should pass authorization because it has a valid api key"""
+        global homed
+        global estop
+
         res = self.client.get(
             "/machinekit/status",
             headers={"API_KEY": CONFIG['security'].get("token")})
+
         axes = res.json['position']
-        global homed
+        estop = res.json['power']['estop']
         for axe in axes:
             if axes[axe]['homed'] == True:
                 homed = True
@@ -120,6 +127,21 @@ class Startup(TestCase):
         self.assert400(res)
 
     @ordered
+    def test_optional_enable_estop(self):
+        if estop:
+            self.skipTest("estop is already enable")
+        command = {"command": "estop"}
+
+        res = self.client.post('/machinekit/status',
+                                headers={
+                                    "API_KEY":
+                                    CONFIG['security'].get("token"),
+                                    "Content-Type": "application/json"
+                                },
+                                data=json.dumps(command))
+        self.assert200(res)
+
+    @ordered
     def test_fail_power_on_while_estop(self):
         """
            Test should fail because machine cannot be powered on while in estop.
@@ -143,6 +165,7 @@ class Startup(TestCase):
                     u'type': u'RuntimeError'
                 }
             }, "Shouldnt be able to turn on machine while in estop")
+
 
     @ordered
     def test_pass_disable_estop(self):
