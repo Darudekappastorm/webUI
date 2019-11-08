@@ -33,7 +33,8 @@ def return_files():
                 FILES_ON_SERVER.append([row['name'], row['path']])
 
         return {"result": FILES_ON_SERVER, "file_queue": settings.file_queue}
-    except Exception:
+    except Exception as err:
+        settings.logger.error(err)
         return {
             "errors": MESSAGE['internal-server-error']
         }, MESSAGE['internal-server-error']['status']
@@ -117,7 +118,8 @@ def upload():
                 "type": err_type
             }
         }, status
-    except Exception:
+    except Exception as err:
+        settings.logger.error(err)
         return {
             "errors": MESSAGE['internal-server-error']
         }, MESSAGE['internal-server-error']['status']

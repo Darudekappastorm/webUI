@@ -1,16 +1,19 @@
 import json
-import settings
 import werkzeug
 from marshmallow import ValidationError
 from flask import request
+import settings
 
 with open("./jsonFiles/errorMessages.json") as f:
     MESSAGE = json.load(f)
+
+settings.init()
 
 
 def errors(func):
     """Decorator that wraps function in try/catch and handles all exceptions"""
     def error_wrapper(*args, **kwargs):
+        """Error handler"""
         try:
             if request.method == "POST":
                 if not request.json:
@@ -68,6 +71,7 @@ def errors(func):
                 }
             }, MESSAGE['invalid-content']['status']
         except Exception as err:
+            settings.logger.error(err)
             return {"errors": {"message": err.message}}, 500
 
     error_wrapper.__name__ = func.__name__

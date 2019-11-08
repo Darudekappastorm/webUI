@@ -1,7 +1,7 @@
 import sys
 import configparser
-import settings
 from flask import render_template
+import settings
 from config.startup import app
 
 app = app()
@@ -22,10 +22,12 @@ else:
             CONFIG["server"]["axis_config"])
         settings.machinekit_running = True
     except (linuxcnc.error) as err:
+        settings.logger.error(err)
         print(
             "Machinekit is down please start machinekit and then restart the server"
         )
     except Exception as err:
+        settings.logger.error(err)
         sys.exit({"errors": [err]})
 
 
