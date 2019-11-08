@@ -21,4 +21,16 @@ If you are all set start the server with: python server.py
 # Unit tests
 To successfully run the unit tests make sure to either have mock set to true or have linuxcnc running. 
 run the unit tests with the following command:
-- python -m unittests/test
+
+Be warned that these tests will actually move the machine if you decide to run it on a working environment!
+The following movements will be done:
+  - Home
+  - Move x/y/z to 1
+  - Move x to 2 at the speed of 10mm/s
+  - Move x/y/z to 0
+  - Move spindle forwards/backwards and increase/decrease the speed
+  - Brake the spindle
+  - Turn the spindle off
+
+To run the test type:
+  - python -m unittests/test
